@@ -1,0 +1,6 @@
+[package]
+name = "merkle-tree-stream"
+version = "0.1.0"
+authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
+
+[dependencies]
