@@ -1,4 +1,9 @@
 [[package]]
+name = "flat-tree"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "futures"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7,8 +12,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "merkle-tree-stream"
 version = "0.1.0"
 dependencies = [
+ "flat-tree 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [metadata]
+"checksum flat-tree 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0916a43295363051f8e70e98cfafd58f185c895ea5c32aa6163825be13ada78a"
 "checksum futures 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)" = "0bab5b5e94f5c31fc764ba5dd9ad16568aae5d4825538c01d6bca680c9bf94a7"
