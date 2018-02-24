@@ -1,7 +1,9 @@
 [package]
 name = "merkle-tree-stream"
+description = "A stream that generates a merkle tree based on the incoming data."
 version = "0.0.1"
 authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
+license = "Apache-2.0"
 
 [dependencies]
 futures = "0.1.18"
