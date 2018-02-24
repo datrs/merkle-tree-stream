@@ -47,13 +47,18 @@ pub struct MerkleTreeStream<L, P> {
   pub parent_handler: P,
 }
 
-// impl<L, P> MerkleTreeStream<L, P>
-//   where L: fn () -> i32,
-//         P: fn () -> i32,
-// {
-//   fn new (leaf_handler: L, parent_handler: P) -> i32 {
-//   }
-// }
+impl<L, P> MerkleTreeStream<L, P> {
+  /// Create a new MerkleTreeStream instance. Takes a closure to create the leaf nodes, and a
+  /// method to create the parent nodes.
+  pub fn new(leaf_handler: L, parent_handler: P) -> MerkleTreeStream<L, P> {
+    MerkleTreeStream {
+      blocks: 0,
+      roots: Vec::new(),
+      leaf_handler: leaf_handler,
+      parent_handler: parent_handler,
+    }
+  }
+}
 
 impl<L, P> Stream for MerkleTreeStream<L, P> {
   type Item = Chunk;
