@@ -2,16 +2,20 @@
 [![crates.io version][1]][2] [![build status][3]][4]
 [![downloads][5]][6] [![docs.rs docs][7]][8]
 
-A stream that generates a merkle tree based on the incoming data.
+A stream that generates a merkle tree based on the incoming data. Adapted from
+[mafintosh/merkle-tree-stream](https://github.com/mafintosh/merkle-tree-stream).
+
+- [Documentation][8]
+- [Crate][2]
 
 ## Installation
 ```sh
 $ cargo add merkle-tree-stream
 ```
 
-## Links
-- [documentation][8]
-- [crate][2]
+## Tasks
+- [ ] Implement sync iterator version.
+- [ ] Implement async stream version (wait for Futures 1.0.0).
 
 ## License
 [Apache-2.0](./LICENSE)

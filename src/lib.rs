@@ -13,13 +13,32 @@
 //!
 //! This module is only needed to create new Dat archives, but not to read them.
 //!
+//! ## Usage
+//! ```rust,ignore
+//! extern crate merkle_tree_stream as merkle;
+//! extern crate sodiumoxide;
+//!
+//! use sodiumoxide::crypto::hash::sha256;
+//! use merkle::MerkleTreeStream;
+//!
+//! let s = MerkleTreeStream {
+//!   index: 0,
+//!   leaf: |leaf, roots| -> [u8] {
+//!     sha256.hash(leaf.data)
+//!   }
+//!   parent: |a, b| -> [u8] {
+//!     sha256.hash(a + b)
+//!   }
+//! }
+//! ```
+//!
+//! ## Installation
+//! ```sh
+//! $ cargo add merkle-tree-stream
+//! ```
+//!
 //! ## See Also
 //! - [`flat-tree`](https://docs.rs/flat-tree)
-
-extern crate futures;
-
-use futures::{Async, Poll, Stream};
-use std::error::Error;
 
 /// The data returned from the Stream.
 #[derive(Debug, PartialEq, PartialOrd)]
@@ -35,7 +54,7 @@ pub struct Chunk {
 }
 
 /// A merkle tree stream.
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug)]
 pub struct MerkleTreeStream<L, P> {
   /// The amount of blocks stored.
   pub blocks: u64,
@@ -47,24 +66,10 @@ pub struct MerkleTreeStream<L, P> {
   pub parent_handler: P,
 }
 
-impl<L, P> MerkleTreeStream<L, P> {
-  /// Create a new MerkleTreeStream instance. Takes a closure to create the leaf nodes, and a
-  /// method to create the parent nodes.
-  pub fn new(leaf_handler: L, parent_handler: P) -> MerkleTreeStream<L, P> {
-    MerkleTreeStream {
-      blocks: 0,
-      roots: Vec::new(),
-      leaf_handler: leaf_handler,
-      parent_handler: parent_handler,
-    }
-  }
-}
-
-impl<L, P> Stream for MerkleTreeStream<L, P> {
+impl<L, P> Iterator for MerkleTreeStream<L, P> {
   type Item = Chunk;
-  type Error = Box<Error>;
 
-  fn poll(&mut self) -> Poll<Option<Self::Item>, Self::Error> {
-    Ok(Async::NotReady)
+  fn next(&mut self) -> Option<Self::Item> {
+    None
   }
 }

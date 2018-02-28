@@ -11,3 +11,4 @@ flat-tree = "1.0.0"
 
 [dev-dependencies]
 clippy = "0.0.186"
+sodiumoxide = "0.0.16"
