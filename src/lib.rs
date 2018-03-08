@@ -21,22 +21,26 @@
 //! ## See Also
 //! - [`flat-tree`](https://docs.rs/flat-tree)
 
+extern crate flat_tree as flat;
+
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Chunk {
   pub index: u64,
   pub parent: u64,
-  pub hash: Vec<u8>,
-  pub data: Vec<u8>,
+  pub hash: Option<Vec<u8>>,
+  pub data: Option<Vec<u8>>,
 }
 
 pub trait StreamHandler {
-  fn leaf(&self, leaf: Chunk, roots: &[Chunk]);
+  fn leaf(&self, leaf: Chunk, roots: &Vec<Chunk>) -> Vec<u8>;
   fn parent(&self, a: Chunk, b: Chunk);
 }
 
 #[derive(Debug)]
 pub struct MerkleTreeStream<T> {
   handler: T,
+  roots: Vec<Chunk>,
+  blocks: u64,
 }
 
 impl<T> MerkleTreeStream<T>
@@ -44,8 +48,31 @@ where
   T: StreamHandler,
 {
   pub fn new(handler: T) -> MerkleTreeStream<T> {
-    MerkleTreeStream { handler: handler }
+    MerkleTreeStream {
+      handler: handler,
+      roots: Vec::new(),
+      blocks: 0,
+    }
   }
 
-  // pub fn write(buf: &[u8]) -> Chunk {}
+  // pub fn with_roots(handler: T, roots) -> MerkleTreeStream<T> {
+  //   // calculate blocks
+  //   // calculate parents on roots
+  //   MerkleTreeStream { handler: handler, roots: roots }
+  // }
+
+  pub fn next(&mut self, buf: &[u8]) {
+    let index = 2 * self.blocks;
+    self.blocks = self.blocks + 1;
+
+    let mut leaf = Chunk {
+      index: index,
+      parent: flat::parent(index),
+      hash: None,
+      data: None,
+    };
+
+    let hash = self.handler.leaf(leaf, &self.roots);
+    leaf.hash = Some(hash);
+  }
 }
