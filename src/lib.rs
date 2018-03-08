@@ -1,4 +1,4 @@
-#![deny(warnings, missing_docs)]
+// #![deny(warnings, missing_docs)]
 #![cfg_attr(test, feature(plugin))]
 #![cfg_attr(test, plugin(clippy))]
 
@@ -13,25 +13,6 @@
 //!
 //! This module is only needed to create new Dat archives, but not to read them.
 //!
-//! ## Usage
-//! ```rust,ignore
-//! extern crate merkle_tree_stream as merkle;
-//! extern crate sodiumoxide;
-//!
-//! use sodiumoxide::crypto::hash::sha256;
-//! use merkle::MerkleTreeStream;
-//!
-//! let s = MerkleTreeStream {
-//!   index: 0,
-//!   leaf: |leaf, roots| -> [u8] {
-//!     sha256.hash(leaf.data)
-//!   }
-//!   parent: |a, b| -> [u8] {
-//!     sha256.hash(a + b)
-//!   }
-//! }
-//! ```
-//!
 //! ## Installation
 //! ```sh
 //! $ cargo add merkle-tree-stream
@@ -40,36 +21,29 @@
 //! ## See Also
 //! - [`flat-tree`](https://docs.rs/flat-tree)
 
-/// The data returned from the Stream.
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Chunk {
-  /// Offset from which the data was taken.
   pub index: u64,
-  /// Parent node.
   pub parent: u64,
-  /// Hash created from the hashing function
   pub hash: Vec<u8>,
-  /// Data that was hashed.
   pub data: Vec<u8>,
 }
 
-/// A merkle tree stream.
-#[derive(Debug)]
-pub struct MerkleTreeStream<L, P> {
-  /// The amount of blocks stored.
-  pub blocks: u64,
-  /// The root nodes.
-  pub roots: Vec<i32>,
-  /// Closure that's called on each leaf node.
-  pub leaf_handler: L,
-  /// Closure that's called on each parent node.
-  pub parent_handler: P,
+pub trait StreamHandler {
+  fn leaf(&self, Chunk, &[Chunk]);
+  fn parent(&self, Chunk, Chunk);
 }
 
-impl<L, P> Iterator for MerkleTreeStream<L, P> {
-  type Item = Chunk;
+#[derive(Debug)]
+pub struct MerkleTreeStream<T> {
+  handler: T,
+}
 
-  fn next(&mut self) -> Option<Self::Item> {
-    None
+impl<T> MerkleTreeStream<T>
+where
+  T: StreamHandler,
+{
+  pub fn new(handler: T) -> MerkleTreeStream<T> {
+    MerkleTreeStream { handler: handler }
   }
 }
