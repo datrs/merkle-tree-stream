@@ -30,8 +30,8 @@ pub struct Chunk {
 }
 
 pub trait StreamHandler {
-  fn leaf(&self, Chunk, &[Chunk]);
-  fn parent(&self, Chunk, Chunk);
+  fn leaf(&self, leaf: Chunk, roots: &[Chunk]);
+  fn parent(&self, a: Chunk, b: Chunk);
 }
 
 #[derive(Debug)]
@@ -46,4 +46,6 @@ where
   pub fn new(handler: T) -> MerkleTreeStream<T> {
     MerkleTreeStream { handler: handler }
   }
+
+  // pub fn write(buf: &[u8]) -> Chunk {}
 }
