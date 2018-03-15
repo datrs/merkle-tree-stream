@@ -60,11 +60,7 @@ where
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(
-    &mut self,
-    _buf: &[u8],
-    nodes: &'a mut Vec<Rc<Chunk>>,
-  ) -> &'a mut Vec<Rc<Chunk>> {
+  pub fn next(&mut self, _buf: &[u8], nodes: &mut Vec<Rc<Chunk>>) {
     let index = 2 * self.blocks;
     self.blocks = self.blocks + 1;
 
@@ -108,7 +104,5 @@ where
       &self.roots.push(Rc::clone(&leaf));
       &nodes.push(Rc::clone(&leaf));
     }
-
-    nodes
   }
 }
