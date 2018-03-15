@@ -6,10 +6,11 @@
 //! [`mafintosh/merkle-tree-stream`](https://github.com/mafintosh/merkle-tree-stream).
 //!
 //! ## Why?
-//! Signatures & integrity checks are part of what makes Dat a great protocol. Each chunk that
-//! passes through the system is hashed and made part of a tree of hashes. We end up creating
-//! hashes of hashes thanks to [`flat-tree`](https://docs.rs/flat-tree), which in the end allows us
-//! to validate our complete data set.
+//! Signatures & integrity checks are part of what makes Dat a great protocol.
+//! Each chunk that passes through the system is hashed and made part of a tree
+//! of hashes. We end up creating hashes of hashes thanks to
+//! [`flat-tree`](https://docs.rs/flat-tree), which in the end allows us to
+//! validate our complete data set.
 //!
 //! This module is only needed to create new Dat archives, but not to read them.
 //!
@@ -25,8 +26,8 @@ extern crate flat_tree as flat;
 
 use std::rc::Rc;
 
-#[derive(Debug, PartialEq, PartialOrd)]
-pub struct Chunk {
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct Node {
   pub index: u64,
   pub parent: u64,
   pub size: usize,
@@ -34,15 +35,18 @@ pub struct Chunk {
   pub data: Option<Vec<u8>>,
 }
 
+/// A vector of Nodes.
+pub type NodeVector = Vec<Rc<Node>>;
+
 pub trait StreamHandler {
-  fn leaf(&self, leaf: &Chunk, roots: &Vec<Rc<Chunk>>) -> Vec<u8>;
-  fn parent(&self, a: &Chunk, b: &Chunk) -> Vec<u8>;
+  fn leaf(&self, leaf: &Node, roots: &NodeVector) -> Vec<u8>;
+  fn parent(&self, a: &Node, b: &Node) -> Vec<u8>;
 }
 
 #[derive(Debug)]
 pub struct MerkleTreeStream<T> {
   handler: T,
-  roots: Vec<Rc<Chunk>>,
+  roots: NodeVector,
   blocks: u64,
 }
 
@@ -50,7 +54,7 @@ impl<T> MerkleTreeStream<T>
 where
   T: StreamHandler,
 {
-  pub fn new(handler: T, roots: Vec<Rc<Chunk>>) -> MerkleTreeStream<T> {
+  pub fn new(handler: T, roots: NodeVector) -> MerkleTreeStream<T> {
     MerkleTreeStream {
       handler: handler,
       roots: roots,
@@ -60,11 +64,11 @@ where
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(&mut self, _buf: &[u8], nodes: &'a mut Vec<Rc<Chunk>>) {
+  pub fn next<'a>(&mut self, _buf: &[u8], nodes: &'a mut NodeVector) {
     let index = 2 * self.blocks;
     self.blocks = self.blocks + 1;
 
-    let mut leaf = Chunk {
+    let mut leaf = Node {
       index: index,
       parent: flat::parent(index),
       size: 0,
@@ -87,7 +91,7 @@ where
           break;
         }
 
-        Chunk {
+        Node {
           index: left.parent,
           parent: flat::parent(left.parent),
           hash: Some(self.handler.parent(&left, &right)),

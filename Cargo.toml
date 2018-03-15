@@ -6,7 +6,6 @@ authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
 license = "Apache-2.0"
 
 [dependencies]
-futures = "0.1.18"
 flat-tree = "1.0.0"
 
 [dev-dependencies]
