@@ -35,6 +35,23 @@ pub struct Node {
   pub data: Option<Vec<u8>>,
 }
 
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct Leaf {
+  pub index: u64,
+  pub parent: u64,
+  pub size: usize,
+  pub hash: Option<Vec<u8>>,
+  pub data: Option<Vec<u8>>,
+}
+
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct Parent {
+  pub index: u64,
+  pub parent: u64,
+  pub size: usize,
+  pub hash: Option<Vec<u8>>,
+}
+
 /// A vector of Nodes.
 pub type NodeVector = Vec<Rc<Node>>;
 

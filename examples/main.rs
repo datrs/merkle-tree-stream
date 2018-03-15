@@ -8,8 +8,15 @@ use std::rc::Rc;
 struct S;
 impl StreamHandler for S {
   fn leaf(&self, leaf: &Node, _roots: &Vec<Rc<Node>>) -> Vec<u8> {
-    let digest = sha256::hash(&Vec::new());
-    digest.0.to_vec()
+    match leaf.data {
+      None => Vec::new(), // TODO: this part suckkksssss, we should never expose this interface.
+      Some(ref data) => {
+        let digest = sha256::hash(&data);
+        let res = digest.0.to_vec();
+        println!("res {:?}", res);
+        res
+      }
+    }
   }
 
   fn parent(&self, a: &Node, b: &Node) -> Vec<u8> {
@@ -21,7 +28,6 @@ impl StreamHandler for S {
 fn main() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(S, roots);
-
   let mut nodes: Vec<Rc<Node>> = Vec::new();
   mts.next(b"hello", &mut nodes);
   mts.next(b"hashed", &mut nodes);
