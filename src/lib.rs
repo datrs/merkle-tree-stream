@@ -62,9 +62,9 @@ where
   /// result back out to "nodes".
   pub fn next<'a>(
     &mut self,
-    buf: &[u8],
-    nodes: &'a mut Vec<Chunk>,
-  ) -> &'a mut Vec<Chunk> {
+    _buf: &[u8],
+    nodes: &'a mut Vec<Rc<Chunk>>,
+  ) -> &'a mut Vec<Rc<Chunk>> {
     let index = 2 * self.blocks;
     self.blocks = self.blocks + 1;
 
@@ -78,35 +78,35 @@ where
 
     let hash = self.handler.leaf(&leaf, &self.roots);
     leaf.hash = Some(hash);
-    // self.roots.push(inner);
-    nodes.push(leaf);
+    let leaf = Rc::new(leaf);
+    &self.roots.push(Rc::clone(&leaf));
+    &nodes.push(Rc::clone(&leaf));
 
     while self.roots.len() > 1 {
-      {
-        // We're creating this block so `left` and `right`'s mutable handles are
-        // dropped so we can call .pop() again on the vector.
+      let leaf = {
         let left = &self.roots[self.roots.len() - 2];
         let right = &self.roots[self.roots.len() - 1];
 
         if left.parent != right.parent {
           break;
         }
-      }
 
-      &self.roots.pop();
-      let left = &self.roots[self.roots.len() - 1];
-      let right = &self.roots[self.roots.len()];
-
-      let leaf = Chunk {
-        index: left.parent,
-        parent: flat::parent(left.parent),
-        hash: Some(self.handler.parent(&left, &right)),
-        size: left.size + right.size,
-        data: None,
+        Chunk {
+          index: left.parent,
+          parent: flat::parent(left.parent),
+          hash: Some(self.handler.parent(&left, &right)),
+          size: left.size + right.size,
+          data: None,
+        }
       };
 
-      // self.roots[self.roots.len() - 1] = Rc::new(leaf);
-      &nodes.push(leaf);
+      for _ in 0..2 {
+        &self.roots.pop();
+      }
+
+      let leaf = Rc::new(leaf);
+      &self.roots.push(Rc::clone(&leaf));
+      &nodes.push(Rc::clone(&leaf));
     }
 
     nodes
