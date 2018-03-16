@@ -2,6 +2,8 @@
 name = "merkle-tree-stream"
 description = "A stream that generates a merkle tree based on the incoming data."
 version = "0.1.1-alpha.0"
+repository = "https://github.com/datrs/merkle-tree-stream"
+documentation = "https://docs.rs/merkle-tree-stream"
 authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
 license = "Apache-2.0"
 
