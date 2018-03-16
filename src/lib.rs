@@ -26,40 +26,35 @@ extern crate flat_tree as flat;
 
 use std::rc::Rc;
 
+/// Node representation.
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Node {
   pub index: u64,
   pub parent: u64,
   pub size: usize,
-  pub hash: Option<Vec<u8>>,
+  pub hash: Vec<u8>,
   pub data: Option<Vec<u8>>,
 }
 
+/// Intermediate Node representation. Same as Node, but without the `.hash` field.
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Leaf {
+pub struct PartialNode {
   pub index: u64,
   pub parent: u64,
   pub size: usize,
-  pub hash: Option<Vec<u8>>,
   pub data: Option<Vec<u8>>,
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Parent {
-  pub index: u64,
-  pub parent: u64,
-  pub size: usize,
-  pub hash: Option<Vec<u8>>,
-}
-
-/// A vector of Nodes.
+/// A vector of `Node` types.
 pub type NodeVector = Vec<Rc<Node>>;
 
+/// Functions that need to be implemented for `MerkleTreeStream`.
 pub trait StreamHandler {
-  fn leaf(&self, leaf: &Node, roots: &NodeVector) -> Vec<u8>;
+  fn leaf(&self, leaf: &PartialNode, roots: &NodeVector) -> Vec<u8>;
   fn parent(&self, a: &Node, b: &Node) -> Vec<u8>;
 }
 
+/// Main constructor. Takes an instance of `MerkleTreeStream`.
 #[derive(Debug)]
 pub struct MerkleTreeStream<T> {
   handler: T,
@@ -81,21 +76,26 @@ where
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(&mut self, _buf: &[u8], nodes: &'a mut NodeVector) {
+  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut NodeVector) {
     let index = 2 * self.blocks;
     self.blocks = self.blocks + 1;
 
-    let mut leaf = Node {
+    let leaf = PartialNode {
       index: index,
       parent: flat::parent(index),
       size: 0,
-      hash: None,
-      data: None,
+      data: Some(data.to_vec()),
     };
 
     let hash = self.handler.leaf(&leaf, &self.roots);
-    leaf.hash = Some(hash);
-    let leaf = Rc::new(leaf);
+    let leaf = Rc::new(Node {
+      index: leaf.index,
+      parent: leaf.parent,
+      size: leaf.size,
+      data: leaf.data,
+      hash: hash,
+    });
+
     &self.roots.push(Rc::clone(&leaf));
     &nodes.push(Rc::clone(&leaf));
 
@@ -111,7 +111,7 @@ where
         Node {
           index: left.parent,
           parent: flat::parent(left.parent),
-          hash: Some(self.handler.parent(&left, &right)),
+          hash: self.handler.parent(&left, &right),
           size: left.size + right.size,
           data: None,
         }
