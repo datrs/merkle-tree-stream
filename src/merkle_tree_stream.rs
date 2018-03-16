@@ -67,7 +67,7 @@ where
   /// result back out to "nodes".
   pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut NodeVector) {
     let index = 2 * self.blocks;
-    self.blocks = self.blocks + 1;
+    self.blocks += 1;
 
     let leaf = PartialNode {
       index: index,
@@ -85,8 +85,8 @@ where
       hash: hash,
     });
 
-    &self.roots.push(Rc::clone(&leaf));
-    &nodes.push(Rc::clone(&leaf));
+    self.roots.push(Rc::clone(&leaf));
+    nodes.push(Rc::clone(&leaf));
 
     while self.roots.len() > 1 {
       let leaf = {
@@ -100,19 +100,19 @@ where
         Node {
           index: left.parent,
           parent: flat::parent(left.parent),
-          hash: self.handler.parent(&left, &right),
+          hash: self.handler.parent(left, right),
           size: left.size + right.size,
           data: None,
         }
       };
 
       for _ in 0..2 {
-        &self.roots.pop();
+        self.roots.pop();
       }
 
       let leaf = Rc::new(leaf);
-      &self.roots.push(Rc::clone(&leaf));
-      &nodes.push(Rc::clone(&leaf));
+      self.roots.push(Rc::clone(&leaf));
+      nodes.push(Rc::clone(&leaf));
     }
   }
 }

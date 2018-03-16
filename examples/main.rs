@@ -1,13 +1,14 @@
 extern crate merkle_tree_stream;
 extern crate rust_sodium;
 
-use merkle_tree_stream::{MerkleTreeStream, Node, PartialNode, StreamHandler};
+use merkle_tree_stream::{HashMethods, MerkleTreeStream, Node, NodeVector,
+                         PartialNode};
 use rust_sodium::crypto::hash::sha256;
 use std::rc::Rc;
 
 struct S;
-impl StreamHandler for S {
-  fn leaf(&self, leaf: &PartialNode, _roots: &Vec<Rc<Node>>) -> Vec<u8> {
+impl HashMethods for S {
+  fn leaf(&self, leaf: &PartialNode, _roots: &NodeVector) -> Vec<u8> {
     match leaf.data {
       Some(ref data) => sha256::hash(&data).0.to_vec(),
       None => panic!("Merkle tree stream did not have any data on the node. This should never happen."),

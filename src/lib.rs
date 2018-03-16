@@ -20,12 +20,12 @@
 //! extern crate merkle_tree_stream;
 //! extern crate rust_sodium;
 //!
-//! use merkle_tree_stream::{MerkleTreeStream, Node, PartialNode, StreamHandler};
+//! use merkle_tree_stream::{MerkleTreeStream, Node, PartialNode, HashMethods};
 //! use rust_sodium::crypto::hash::sha256;
 //! use std::rc::Rc;
 //!
 //! struct S;
-//! impl StreamHandler for S {
+//! impl HashMethods for S {
 //!   fn leaf(&self, leaf: &PartialNode, _roots: &Vec<Rc<Node>>) -> Vec<u8> {
 //!     match leaf.data {
 //!       Some(ref data) => sha256::hash(&data).0.to_vec(),
