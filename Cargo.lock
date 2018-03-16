@@ -236,7 +236,7 @@ dependencies = [
 
 [[package]]
 name = "merkle-tree-stream"
-version = "0.1.1"
+version = "0.1.2-alpha.0"
 dependencies = [
  "clippy 0.0.186 (registry+https://github.com/rust-lang/crates.io-index)",
  "flat-tree 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
