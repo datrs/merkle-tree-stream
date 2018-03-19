@@ -14,7 +14,7 @@ $ cargo add merkle-tree-stream
 ```
 
 ## Tasks
-- [ ] Implement sync iterator version.
+- [x] Implement sync iterator version.
 - [ ] Implement async stream version (wait for Futures 1.0.0).
 
 ## License
