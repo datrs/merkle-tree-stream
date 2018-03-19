@@ -31,7 +31,7 @@ impl HashMethods for S {
 fn main() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(S, roots);
-  let mut nodes: Vec<Rc<Node>> = Vec::new();
+  let mut nodes: NodeVector = Vec::new();
   mts.next(b"hello", &mut nodes);
   mts.next(b"hashed", &mut nodes);
   mts.next(b"world", &mut nodes);
