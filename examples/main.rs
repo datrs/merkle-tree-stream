@@ -13,15 +13,14 @@ impl HashMethods for S {
   }
 
   fn parent(&self, a: &Node, b: &Node) -> Vec<u8> {
-    let mut buffer: Vec<u8> = Vec::with_capacity(a.hash.len() + b.hash.len());
+    let mut buf: Vec<u8> = Vec::with_capacity(a.hash.len() + b.hash.len());
     for c in &a.hash {
-      buffer.push(*c);
+      buf.push(*c);
     }
     for c in &b.hash {
-      buffer.push(*c);
+      buf.push(*c);
     }
-    let digest = sha256::hash(&buffer);
-    digest.0.to_vec()
+    sha256::hash(&buf).0.to_vec()
   }
 }
 
