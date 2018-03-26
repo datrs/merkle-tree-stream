@@ -11,5 +11,5 @@ license = "Apache-2.0"
 flat-tree = "1.0.0"
 
 [dev-dependencies]
-clippy = "0.0.186"
+# clippy = "0.0.186"
 rust_sodium = "0.7.0"
