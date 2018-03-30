@@ -37,7 +37,7 @@ pub type NodeVector = Vec<Rc<Node>>;
 /// Functions that need to be implemented for `MerkleTreeStream`.
 pub trait HashMethods {
   /// Pass data through a hash function.
-  fn leaf(&self, leaf: &PartialNode, roots: &NodeVector) -> Vec<u8>;
+  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Node>]) -> Vec<u8>;
   /// Pass hashes through a hash function.
   fn parent(&self, a: &Node, b: &Node) -> Vec<u8>;
 }
@@ -57,8 +57,8 @@ where
   /// Create a new MerkleTreeStream instance.
   pub fn new(handler: T, roots: NodeVector) -> MerkleTreeStream<T> {
     MerkleTreeStream {
-      handler: handler,
-      roots: roots,
+      handler,
+      roots,
       blocks: 0,
     }
   }
@@ -70,7 +70,7 @@ where
     self.blocks += 1;
 
     let leaf = PartialNode {
-      index: index,
+      index,
       parent: flat::parent(index),
       size: 0,
       data: Some(data.to_vec()),
@@ -82,7 +82,7 @@ where
       parent: leaf.parent,
       size: leaf.size,
       data: leaf.data,
-      hash: hash,
+      hash,
     });
 
     self.roots.push(Rc::clone(&leaf));

@@ -4,10 +4,11 @@ extern crate rust_sodium;
 use merkle_tree_stream::{HashMethods, MerkleTreeStream, Node, NodeVector,
                          PartialNode};
 use rust_sodium::crypto::hash::sha256;
+use std::rc::Rc;
 
 struct S;
 impl HashMethods for S {
-  fn leaf(&self, leaf: &PartialNode, _roots: &NodeVector) -> Vec<u8> {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Node>]) -> Vec<u8> {
     let data = leaf.data.as_ref().expect("leaf.data was None");
     sha256::hash(&data).0.to_vec()
   }
