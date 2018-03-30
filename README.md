@@ -18,7 +18,7 @@ $ cargo add merkle-tree-stream
 - [ ] Implement async stream version (wait for Futures 1.0.0).
 
 ## License
-[Apache-2.0](./LICENSE)
+[MIT](./LICENSE-MIT) OR [Apache-2.0](./LICENSE-APACHE)
 
 [1]: https://img.shields.io/crates/v/merkle-tree-stream.svg?style=flat-square
 [2]: https://crates.io/crates/merkle-tree-stream

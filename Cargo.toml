@@ -5,7 +5,7 @@ version = "0.1.2-alpha.0"
 repository = "https://github.com/datrs/merkle-tree-stream"
 documentation = "https://docs.rs/merkle-tree-stream"
 authors = ["Yoshua Wuyts <yoshuawuyts@gmail.com>"]
-license = "Apache-2.0"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 flat-tree = "1.0.0"
