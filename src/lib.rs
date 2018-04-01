@@ -64,7 +64,7 @@ where
       index: leaf.index,
       parent: leaf.parent,
       size: leaf.size,
-      data: leaf.clone(),
+      data: leaf.clone(), // FIXME: remove clone
       hash,
     });
 
