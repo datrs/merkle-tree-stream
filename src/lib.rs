@@ -6,36 +6,13 @@
 
 extern crate flat_tree as flat;
 
+mod node;
+mod partial_node;
+
+pub use node::Node;
+pub use partial_node::PartialNode;
+
 use std::rc::Rc;
-
-/// Node representation.
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Node {
-  /// Offset into the flat-tree data structure.
-  pub index: u64,
-  /// Reference to this node's parent node.
-  pub parent: u64,
-  /// Total size of all its child nodes combined.
-  pub size: usize,
-  /// Data if it's a leaf node, nothing if it's a parent node.
-  pub data: Option<Vec<u8>>,
-  /// Hash of the data, or child nodes if applicable.
-  pub hash: Vec<u8>,
-}
-
-/// Intermediate Node representation. Same as Node, but without the `.hash`
-/// field.
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct PartialNode {
-  /// Offset into the flat-tree data structure.
-  pub index: u64,
-  /// Reference to this node's parent node.
-  pub parent: u64,
-  /// Total size of all its child nodes combined.
-  pub size: usize,
-  /// Data if it's a leaf node, nothing if it's a parent node.
-  pub data: Option<Vec<u8>>,
-}
 
 /// A vector of `Node` instances.
 pub type NodeVector = Vec<Rc<Node>>;
@@ -53,7 +30,7 @@ pub trait HashMethods {
 pub struct MerkleTreeStream<T> {
   handler: T,
   roots: NodeVector,
-  blocks: u64,
+  blocks: usize,
 }
 
 impl<T> MerkleTreeStream<T>
@@ -72,12 +49,12 @@ where
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
   pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut NodeVector) {
-    let index = 2 * self.blocks;
+    let index: usize = 2 * self.blocks;
     self.blocks += 1;
 
     let leaf = PartialNode {
       index,
-      parent: flat::parent(index),
+      parent: flat::parent(index as u64) as usize,
       size: 0,
       data: Some(data.to_vec()),
     };
@@ -87,7 +64,7 @@ where
       index: leaf.index,
       parent: leaf.parent,
       size: leaf.size,
-      data: leaf.data,
+      data: leaf.clone(),
       hash,
     });
 
@@ -105,7 +82,7 @@ where
 
         Node {
           index: left.parent,
-          parent: flat::parent(left.parent),
+          parent: flat::parent(left.parent as u64) as usize,
           hash: self.handler.parent(left, right),
           size: left.size + right.size,
           data: None,

@@ -30,18 +30,14 @@ use std::rc::Rc;
 struct S;
 impl HashMethods for S {
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Node>]) -> Vec<u8> {
-    let data = leaf.data.as_ref().expect("leaf.data was None");
+    let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
   fn parent(&self, a: &Node, b: &Node) -> Vec<u8> {
-    let mut buf: Vec<u8> = Vec::with_capacity(a.hash.len() + b.hash.len());
-    for c in &a.hash {
-      buf.push(*c);
-    }
-    for c in &b.hash {
-      buf.push(*c);
-    }
+    let mut buf: Vec<u8> = Vec::with_capacity(a.hash().len() + b.hash().len());
+    buf.extend_from_slice(a.hash());
+    buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
 }
