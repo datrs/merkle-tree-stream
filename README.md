@@ -6,7 +6,7 @@ A stream that generates a merkle tree based on the incoming data. Adapted from
 [mafintosh/merkle-tree-stream](https://github.com/mafintosh/merkle-tree-stream).
 
 - [Documentation][8]
-- [Crate][2]
+- [Crates.io][2]
 
 ## Why?
 Signatures & integrity checks are part of what makes Dat a great protocol.
@@ -61,10 +61,6 @@ fn main() {
 ```sh
 $ cargo add merkle-tree-stream
 ```
-
-## Tasks
-- [x] Implement sync iterator version.
-- [ ] Implement async stream version (wait for Futures 1.0.0).
 
 ## License
 [MIT](./LICENSE-MIT) OR [Apache-2.0](./LICENSE-APACHE)
