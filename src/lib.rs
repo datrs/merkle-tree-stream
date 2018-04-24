@@ -54,7 +54,7 @@ where
 
     let leaf = PartialNode {
       index,
-      parent: flat::parent(index as u64) as usize,
+      parent: flat::parent(index) as usize,
       size: 0,
       data: Some(data.to_vec()),
     };
@@ -82,7 +82,7 @@ where
 
         Node {
           index: left.parent,
-          parent: flat::parent(left.parent as u64) as usize,
+          parent: flat::parent(left.parent) as usize,
           hash: self.handler.parent(left, right),
           size: left.size + right.size,
           data: None,
