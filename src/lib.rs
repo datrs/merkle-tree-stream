@@ -98,4 +98,9 @@ where
       nodes.push(Rc::clone(&leaf));
     }
   }
+
+  /// Get the roots vector.
+  pub fn roots(&self) -> &NodeVector {
+    &self.roots
+  }
 }
