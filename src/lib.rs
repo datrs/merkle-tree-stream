@@ -1,8 +1,8 @@
 #![deny(missing_docs)]
 #![feature(external_doc)]
 #![doc(include = "../README.md")]
-#![cfg_attr(test, feature(plugin))]
-#![cfg_attr(test, plugin(clippy))]
+// #![cfg_attr(test, feature(plugin))]
+// #![cfg_attr(test, plugin(clippy))]
 
 extern crate flat_tree as flat;
 
@@ -55,7 +55,7 @@ where
     let leaf = PartialNode {
       index,
       parent: flat::parent(index) as usize,
-      size: 0,
+      length: data.len(),
       data: Some(data.to_vec()),
     };
 
@@ -63,7 +63,7 @@ where
     let leaf = Rc::new(Node {
       index: leaf.index,
       parent: leaf.parent,
-      size: leaf.size,
+      length: leaf.length,
       data: leaf.clone(), // FIXME: remove clone
       hash,
     });
@@ -84,7 +84,7 @@ where
           index: left.parent,
           parent: flat::parent(left.parent) as usize,
           hash: self.handler.parent(left, right),
-          size: left.size + right.size,
+          length: left.length + right.length,
           data: None,
         }
       };

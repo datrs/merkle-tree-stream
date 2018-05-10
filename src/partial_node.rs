@@ -9,7 +9,7 @@ pub struct PartialNode {
   /// Data if it's a leaf node, nothing if it's a parent node.
   pub(crate) data: Option<Vec<u8>>,
   /// Total size of all its child nodes combined.
-  pub(crate) size: usize,
+  pub(crate) length: usize,
   /// Offset into the flat-tree data structure.
   pub(crate) index: usize,
 }
@@ -18,12 +18,12 @@ impl PartialNode {
   /// Returns the number of elements in the Node, also referred to as its
   /// 'length'.
   pub fn len(&self) -> usize {
-    self.size
+    self.length
   }
 
   /// Returns true if the Node contains no elements.
   pub fn is_empty(&self) -> bool {
-    self.size == 0
+    self.length == 0
   }
 
   /// Get the current index into the stream.
