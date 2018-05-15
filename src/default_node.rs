@@ -28,7 +28,7 @@ impl DefaultNode {
       index: partial.index(),
       parent: partial.parent,
       length: partial.len(),
-      data: data,
+      data,
       hash,
     }
   }
