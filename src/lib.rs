@@ -6,39 +6,53 @@
 
 extern crate flat_tree as flat;
 
-mod node;
 mod partial_node;
 
-pub use node::Node;
 pub use partial_node::PartialNode;
 
 use std::rc::Rc;
 
-/// A vector of `Node` instances.
-pub type NodeVector = Vec<Rc<Node>>;
-
 /// Functions that need to be implemented for `MerkleTreeStream`.
-pub trait HashMethods {
+pub trait HashMethods<N> {
   /// Pass data through a hash function.
-  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Node>]) -> Vec<u8>;
+  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<N>]) -> Vec<u8>;
   /// Pass hashes through a hash function.
-  fn parent(&self, a: &Node, b: &Node) -> Vec<u8>;
+  fn parent(&self, a: &N, b: &N) -> Vec<u8>;
+  /// Combine a `PartialNode` and a `Hash` to a `Node` type.
+  fn node(&self, partial_node: &PartialNode, hash: Vec<u8>) -> N;
+}
+
+/// Functions that need to be implemented for the Data that `MerkleTreeStream`
+/// works with.
+pub trait Node {
+  /// Get the length of the node.
+  fn len(&self) -> usize;
+  /// Get the position of the parent of the node.
+  fn parent(&self) -> usize;
+  /// Get the position at which the node was found.
+  fn index(&self) -> usize;
+  /// Get the hash contained in the node.
+  fn hash(&self) -> &[u8];
 }
 
 /// Main constructor. Takes an instance of `HashMethods`.
 #[derive(Debug)]
-pub struct MerkleTreeStream<T> {
+pub struct MerkleTreeStream<T, N>
+where
+  N: Node,
+{
   handler: T,
-  roots: NodeVector,
+  roots: Vec<Rc<N>>,
   blocks: usize,
 }
 
-impl<T> MerkleTreeStream<T>
+impl<T, N> MerkleTreeStream<T, N>
 where
-  T: HashMethods,
+  T: HashMethods<N>,
+  N: Node,
 {
   /// Create a new MerkleTreeStream instance.
-  pub fn new(handler: T, roots: NodeVector) -> MerkleTreeStream<T> {
+  pub fn new(handler: T, roots: Vec<Rc<N>>) -> MerkleTreeStream<T, N> {
     MerkleTreeStream {
       handler,
       roots,
@@ -48,7 +62,7 @@ where
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut NodeVector) {
+  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Rc<N>>) {
     let index: usize = 2 * self.blocks;
     self.blocks += 1;
 
@@ -60,33 +74,29 @@ where
     };
 
     let hash = self.handler.leaf(&leaf, &self.roots);
-    let leaf = Rc::new(Node {
-      index: leaf.index,
-      parent: leaf.parent,
-      length: leaf.length,
-      data: leaf.clone(), // FIXME: remove clone
-      hash,
-    });
+    let node = Rc::new(self.handler.node(&leaf, hash));
 
-    self.roots.push(Rc::clone(&leaf));
-    nodes.push(Rc::clone(&leaf));
+    self.roots.push(Rc::clone(&node));
+    nodes.push(Rc::clone(&node));
 
     while self.roots.len() > 1 {
       let leaf = {
         let left = &self.roots[self.roots.len() - 2];
         let right = &self.roots[self.roots.len() - 1];
 
-        if left.parent != right.parent {
+        if left.parent() != right.parent() {
           break;
         }
 
-        Node {
-          index: left.parent,
-          parent: flat::parent(left.parent) as usize,
-          hash: self.handler.parent(left, right),
-          length: left.length + right.length,
+        let hash = self.handler.parent(left, right);
+        let partial = PartialNode {
+          index: left.parent(),
+          parent: flat::parent(left.parent()) as usize,
+          length: left.len() + right.len(),
           data: None,
-        }
+        };
+
+        self.handler.node(&partial, hash)
       };
 
       for _ in 0..2 {
@@ -100,7 +110,7 @@ where
   }
 
   /// Get the roots vector.
-  pub fn roots(&self) -> &NodeVector {
+  pub fn roots(&self) -> &Vec<Rc<N>> {
     &self.roots
   }
 }
