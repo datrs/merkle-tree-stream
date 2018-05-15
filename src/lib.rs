@@ -6,8 +6,10 @@
 
 extern crate flat_tree as flat;
 
+mod default_node;
 mod partial_node;
 
+pub use default_node::DefaultNode;
 pub use partial_node::PartialNode;
 
 use std::rc::Rc;
@@ -27,6 +29,8 @@ pub trait HashMethods<N> {
 pub trait Node {
   /// Get the length of the node.
   fn len(&self) -> usize;
+  /// Check if the length is zero.
+  fn is_empty(&self) -> bool;
   /// Get the position of the parent of the node.
   fn parent(&self) -> usize;
   /// Get the position at which the node was found.
