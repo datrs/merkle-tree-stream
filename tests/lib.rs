@@ -3,7 +3,9 @@ extern crate merkle_tree_stream;
 use merkle_tree_stream::{
   HashMethods, MerkleTreeStream, Node, NodeVector, PartialNode,
 };
+extern crate hex;
 extern crate rust_sodium;
+use hex::FromHex;
 use rust_sodium::crypto::hash::sha256;
 use std::rc::Rc;
 
@@ -35,10 +37,9 @@ fn mts_one_node() {
   assert_eq!(5, n.len());
   assert_eq!(0, n.position());
 
-  let expected = [
-    44, 242, 77, 186, 95, 176, 163, 14, 38, 232, 59, 42, 197, 185, 226, 158,
-    27, 22, 30, 92, 31, 167, 66, 94, 115, 4, 51, 98, 147, 139, 152, 36,
-  ];
+  let expected = <[u8; 32]>::from_hex(
+    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+  ).unwrap();
   assert_eq!(expected, n.hash());
 }
 
@@ -56,10 +57,9 @@ fn mts_more_nodes() {
   assert_eq!(3, nodes.len());
 
   // check root node
-  let expected_r = [
-    229, 160, 31, 238, 20, 224, 237, 92, 72, 113, 79, 34, 24, 15, 37, 173, 131,
-    101, 181, 63, 151, 121, 247, 157, 196, 163, 215, 233, 57, 99, 249, 74,
-  ];
+  let expected_r = <[u8; 32]>::from_hex(
+    "e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a",
+  ).unwrap();
   {
     let rs = mts.roots();
     assert_eq!(1, rs.len());
@@ -82,10 +82,9 @@ fn mts_more_nodes() {
     let r = &rs[0];
     assert_eq!(expected_r, r.hash());
 
-    let expected_c = [
-      46, 125, 44, 3, 169, 80, 122, 226, 101, 236, 245, 181, 53, 104, 133, 165,
-      51, 147, 162, 2, 157, 36, 19, 148, 153, 114, 101, 161, 162, 90, 239, 198,
-    ];
+    let expected_c = <[u8; 32]>::from_hex(
+      "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
+    ).unwrap();
     let c = &rs[1];
     assert_eq!(expected_c, c.hash());
   }
@@ -102,10 +101,9 @@ fn mts_more_nodes() {
   {
     let rs = mts.roots();
     let t = &rs[0];
-    let expected_t = [
-      20, 237, 229, 232, 233, 122, 217, 55, 35, 39, 114, 143, 80, 153, 185, 86,
-      4, 163, 149, 147, 202, 195, 189, 56, 163, 67, 173, 118, 32, 82, 19, 231,
-    ];
+    let expected_t = <[u8; 32]>::from_hex(
+      "14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7",
+    ).unwrap();
     assert_eq!(expected_t, t.hash());
   }
 }
