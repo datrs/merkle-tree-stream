@@ -1,7 +1,7 @@
 extern crate merkle_tree_stream;
 
 use merkle_tree_stream::{
-  HashMethods, MerkleTreeStream, Node, NodeVector, PartialNode,
+  DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode,
 };
 extern crate hex;
 extern crate rust_sodium;
@@ -10,17 +10,21 @@ use rust_sodium::crypto::hash::sha256;
 use std::rc::Rc;
 
 struct S;
-impl HashMethods for S {
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Node>]) -> Vec<u8> {
+impl HashMethods<DefaultNode> for S {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Vec<u8> {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
-  fn parent(&self, a: &Node, b: &Node) -> Vec<u8> {
+  fn parent(&self, a: &DefaultNode, b: &DefaultNode) -> Vec<u8> {
     let mut buf: Vec<u8> = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
+  }
+
+  fn node(&self, partial: &PartialNode, hash: Vec<u8>) -> DefaultNode {
+    DefaultNode::from_partial(partial, hash)
   }
 }
 
@@ -28,14 +32,14 @@ impl HashMethods for S {
 fn mts_one_node() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(S, roots);
-  let mut nodes: NodeVector = Vec::new();
+  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
   mts.next(b"hello", &mut nodes);
   assert_eq!(1, nodes.len());
 
   // check node
   let n = nodes.pop().unwrap();
   assert_eq!(5, n.len());
-  assert_eq!(0, n.position());
+  assert_eq!(0, n.index());
 
   let expected = <[u8; 32]>::from_hex(
     "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
@@ -47,7 +51,7 @@ fn mts_one_node() {
 fn mts_more_nodes() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(S, roots);
-  let mut nodes: NodeVector = Vec::new();
+  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
   mts.next(b"a", &mut nodes);
   mts.next(b"b", &mut nodes);
 
