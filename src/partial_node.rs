@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 /// Intermediate Node representation. Same as Node, but without the `.hash`
 /// field.
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct PartialNode {
   /// Reference to this node's parent node.
   pub parent: usize,
@@ -27,8 +27,12 @@ impl PartialNode {
   }
 
   /// Get the current index into the stream.
-  pub fn position(&self) -> usize {
+  pub fn index(&self) -> usize {
     self.index
+  }
+  /// Get the data from the thingy.
+  pub fn data(&self) -> &Option<Vec<u8>> {
+    &self.data
   }
 }
 
