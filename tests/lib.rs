@@ -14,21 +14,23 @@ use std::collections::HashSet;
 use std::iter;
 use std::rc::Rc;
 
-struct S;
-impl HashMethods<DefaultNode> for S {
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Vec<u8> {
+struct H;
+impl HashMethods for H {
+  type Node = DefaultNode;
+
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Vec<u8> {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
-  fn parent(&self, a: &DefaultNode, b: &DefaultNode) -> Vec<u8> {
+  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Vec<u8> {
     let mut buf: Vec<u8> = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
 
-  fn node(&self, partial: &PartialNode, hash: Vec<u8>) -> DefaultNode {
+  fn node(&self, partial: &PartialNode, hash: Vec<u8>) -> Self::Node {
     DefaultNode::from_partial(partial, hash)
   }
 }
@@ -36,7 +38,7 @@ impl HashMethods<DefaultNode> for S {
 #[test]
 fn mts_one_node() {
   let roots = Vec::new();
-  let mut mts = MerkleTreeStream::new(S, roots);
+  let mut mts = MerkleTreeStream::new(H, roots);
   let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
   mts.next(b"hello", &mut nodes);
   assert_eq!(1, nodes.len());
@@ -55,7 +57,7 @@ fn mts_one_node() {
 #[test]
 fn mts_more_nodes() {
   let roots = Vec::new();
-  let mut mts = MerkleTreeStream::new(S, roots);
+  let mut mts = MerkleTreeStream::new(H, roots);
   let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
   mts.next(b"a", &mut nodes);
   mts.next(b"b", &mut nodes);

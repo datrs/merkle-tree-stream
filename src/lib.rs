@@ -15,13 +15,17 @@ pub use partial_node::PartialNode;
 use std::rc::Rc;
 
 /// Functions that need to be implemented for `MerkleTreeStream`.
-pub trait HashMethods<N> {
+pub trait HashMethods {
+  /// The Node type we'll iterate over.
+  type Node: Node;
+  // /// The Hash type that's passed around.
+  // type Hash;
   /// Pass data through a hash function.
-  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<N>]) -> Vec<u8>;
+  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Vec<u8>;
   /// Pass hashes through a hash function.
-  fn parent(&self, a: &N, b: &N) -> Vec<u8>;
+  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Vec<u8>;
   /// Combine a `PartialNode` and a `Hash` to a `Node` type.
-  fn node(&self, partial_node: &PartialNode, hash: Vec<u8>) -> N;
+  fn node(&self, partial_node: &PartialNode, hash: Vec<u8>) -> Self::Node;
 }
 
 /// Functions that need to be implemented for the Data that `MerkleTreeStream`
@@ -41,22 +45,15 @@ pub trait Node {
 
 /// Main constructor. Takes an instance of `HashMethods`.
 #[derive(Debug)]
-pub struct MerkleTreeStream<T, N>
-where
-  N: Node,
-{
+pub struct MerkleTreeStream<T: HashMethods> {
   handler: T,
-  roots: Vec<Rc<N>>,
+  roots: Vec<Rc<T::Node>>,
   blocks: usize,
 }
 
-impl<T, N> MerkleTreeStream<T, N>
-where
-  T: HashMethods<N>,
-  N: Node,
-{
+impl<H: HashMethods> MerkleTreeStream<H> {
   /// Create a new MerkleTreeStream instance.
-  pub fn new(handler: T, roots: Vec<Rc<N>>) -> MerkleTreeStream<T, N> {
+  pub fn new(handler: H, roots: Vec<Rc<H::Node>>) -> MerkleTreeStream<H> {
     MerkleTreeStream {
       handler,
       roots,
@@ -66,7 +63,7 @@ where
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Rc<N>>) {
+  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Rc<H::Node>>) {
     let index: usize = 2 * self.blocks;
     self.blocks += 1;
 
@@ -114,7 +111,7 @@ where
   }
 
   /// Get the roots vector.
-  pub fn roots(&self) -> &Vec<Rc<N>> {
+  pub fn roots(&self) -> &Vec<Rc<H::Node>> {
     &self.roots
   }
 }

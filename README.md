@@ -27,8 +27,9 @@ use merkle_tree_stream::{HashMethods, DefaultNode, MerkleTreeStream, Node,
 use rust_sodium::crypto::hash::sha256;
 use std::rc::Rc;
 
-struct S;
-impl HashMethods<DefaultNode> for S {
+struct H;
+impl HashMethods for H {
+  type Node = DefaultNode;
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Vec<u8> {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
@@ -48,7 +49,7 @@ impl HashMethods<DefaultNode> for S {
 
 fn main() {
   let roots = Vec::new();
-  let mut mts = MerkleTreeStream::new(S, roots);
+  let mut mts = MerkleTreeStream::new(H, roots);
   let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
   mts.next(b"hello", &mut nodes);
   mts.next(b"hashed", &mut nodes);
