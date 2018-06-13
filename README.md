@@ -32,27 +32,27 @@ impl HashMethods for H {
   type Node = DefaultNode;
   type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Self::Hash {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
-  fn parent(&self, a: &DefaultNode, b: &DefaultNode) -> Self::Hash {
+  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
     let mut buf = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
 
-  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> DefaultNode {
-    DefaultNode::from_partial(partial, hash)
+  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
+    Self::Node::from_partial(partial, hash)
   }
 }
 
 fn main() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(H, roots);
-  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
+  let mut nodes = vec![];
   mts.next(b"hello", &mut nodes);
   mts.next(b"hashed", &mut nodes);
   mts.next(b"world", &mut nodes);
