@@ -10,20 +10,21 @@ use std::rc::Rc;
 struct H;
 impl HashMethods for H {
   type Node = DefaultNode;
+  type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Vec<u8> {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
-  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Vec<u8> {
-    let mut buf: Vec<u8> = Vec::with_capacity(a.hash().len() + b.hash().len());
+  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
+    let mut buf: Self::Hash = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
 
-  fn node(&self, partial: &PartialNode, hash: Vec<u8>) -> Self::Node {
+  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
     // Cloning the data in the reference because we don't own it.
     let data = match partial.data() {
       Some(data) => Some(data.clone()),

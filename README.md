@@ -30,19 +30,21 @@ use std::rc::Rc;
 struct H;
 impl HashMethods for H {
   type Node = DefaultNode;
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Vec<u8> {
+  type Hash = Vec<u8>;
+
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<DefaultNode>]) -> Self::Hash {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
 
-  fn parent(&self, a: &DefaultNode, b: &DefaultNode) -> Vec<u8> {
-    let mut buf: Vec<u8> = Vec::with_capacity(a.hash().len() + b.hash().len());
+  fn parent(&self, a: &DefaultNode, b: &DefaultNode) -> Self::Hash {
+    let mut buf = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
 
-  fn node(&self, partial: &PartialNode, hash: Vec<u8>) -> DefaultNode {
+  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> DefaultNode {
     DefaultNode::from_partial(partial, hash)
   }
 }

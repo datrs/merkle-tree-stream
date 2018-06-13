@@ -18,14 +18,14 @@ use std::rc::Rc;
 pub trait HashMethods {
   /// The Node type we'll iterate over.
   type Node: Node;
-  // /// The Hash type that's passed around.
-  // type Hash;
+  /// The type of hash returned from the hashing functions.
+  type Hash;
   /// Pass data through a hash function.
-  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Vec<u8>;
+  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash;
   /// Pass hashes through a hash function.
-  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Vec<u8>;
+  fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash;
   /// Combine a `PartialNode` and a `Hash` to a `Node` type.
-  fn node(&self, partial_node: &PartialNode, hash: Vec<u8>) -> Self::Node;
+  fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node;
 }
 
 /// Functions that need to be implemented for the Data that `MerkleTreeStream`
