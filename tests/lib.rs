@@ -1,4 +1,6 @@
+extern crate flat_tree;
 extern crate merkle_tree_stream;
+extern crate quickcheck;
 
 use merkle_tree_stream::{
   DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode,
@@ -6,7 +8,10 @@ use merkle_tree_stream::{
 extern crate hex;
 extern crate rust_sodium;
 use hex::FromHex;
+use quickcheck::quickcheck;
 use rust_sodium::crypto::hash::sha256;
+use std::collections::HashSet;
+use std::iter;
 use std::rc::Rc;
 
 struct S;
@@ -110,4 +115,176 @@ fn mts_more_nodes() {
     ).unwrap();
     assert_eq!(expected_t, t.hash());
   }
+}
+
+fn build_mts(
+  data: &[Vec<u8>],
+) -> (MerkleTreeStream<S, DefaultNode>, Vec<Rc<DefaultNode>>) {
+  let roots = Vec::new();
+  let mut mts = MerkleTreeStream::new(S, roots);
+  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
+
+  data.iter().for_each(|bs| mts.next(&bs, &mut nodes));
+  (mts, nodes)
+}
+
+fn all_children(index: usize) -> Box<Iterator<Item = usize>> {
+  let self_ = iter::once(index);
+  match flat_tree::children(index) {
+    Some((left, right)) => {
+      Box::new(self_.chain(all_children(left)).chain(all_children(right)))
+    }
+    None => Box::new(self_),
+  }
+}
+
+#[test]
+fn contains_all_data_in_correct_order() {
+  fn check(data: Vec<Vec<u8>>) -> bool {
+    let (_, nodes) = build_mts(&data);
+
+    let data_in_nodes: Vec<_> =
+      nodes.iter().filter_map(|node| node.data.clone()).collect();
+    data == data_in_nodes
+  }
+  quickcheck(check as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn mts_is_deterministic() {
+  fn prop(data: Vec<Vec<u8>>) -> bool {
+    let (mts1, nodes1) = build_mts(&data);
+    let (mts2, nodes2) = build_mts(&data);
+
+    mts1.roots() == mts2.roots() && nodes1 == nodes2
+  }
+  quickcheck(prop as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn roots_have_no_parent() {
+  fn prop(data: Vec<Vec<u8>>) -> bool {
+    let (mts, nodes) = build_mts(&data);
+    let roots = mts.roots();
+
+    let root_parents: HashSet<_> =
+      roots.iter().map(|root| root.parent()).collect();
+    let node_indices: HashSet<_> =
+      nodes.iter().map(|node| node.index()).collect();
+    root_parents.is_disjoint(&node_indices)
+  }
+  quickcheck(prop as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn roots_are_subset_of_nodes() {
+  fn prop(data: Vec<Vec<u8>>) -> bool {
+    let (mts, nodes) = build_mts(&data);
+    let roots: HashSet<_> =
+      mts.roots().iter().map(|root| root.index()).collect();
+    let nodes: HashSet<_> = nodes.iter().map(|node| node.index()).collect();
+
+    roots.is_subset(&nodes)
+  }
+  quickcheck(prop as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn all_nodes_are_reachable_from_roots() {
+  fn prop(data: Vec<Vec<u8>>) -> bool {
+    let (mts, nodes) = build_mts(&data);
+    let roots = mts.roots();
+
+    let reachable_node_indices: HashSet<_> = roots
+      .iter()
+      .flat_map(|root| all_children(root.index()))
+      .collect();
+    let node_indices: HashSet<_> =
+      nodes.iter().map(|node| node.index()).collect();
+    node_indices.is_subset(&reachable_node_indices)
+  }
+  quickcheck(prop as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn all_leaves_contain_data() {
+  fn prop(data: Vec<Vec<u8>>) -> bool {
+    let (_, nodes) = build_mts(&data);
+
+    nodes
+      .iter()
+      .filter(|node| flat_tree::children(node.index()).is_none())
+      .all(|node| node.data.is_some())
+  }
+  quickcheck(prop as fn(Vec<Vec<u8>>) -> bool);
+}
+
+#[test]
+fn hashes_change_when_data_is_changed() {
+  /// Finds the parent indices (in-tree IDs) of the nth data block
+  fn parent_indices(nodes: &[Rc<DefaultNode>], n: usize) -> HashSet<usize> {
+    let modified_node_index = nodes
+      .iter()
+      .filter(|node| node.data.is_some())
+      .nth(n)
+      .unwrap()
+      .index();
+    let node_indices: HashSet<_> =
+      nodes.iter().map(|node| node.index()).collect();
+    let mut parents = HashSet::new();
+    let mut i = modified_node_index;
+    loop {
+      parents.insert(i);
+      i = flat_tree::parent(i);
+      if !node_indices.contains(&i) {
+        break;
+      }
+    }
+    parents
+  }
+
+  fn partition(
+    nodes: Vec<Rc<DefaultNode>>,
+    indices: &HashSet<usize>,
+  ) -> (Vec<Rc<DefaultNode>>, Vec<Rc<DefaultNode>>) {
+    nodes
+      .into_iter()
+      .partition(|node| indices.contains(&node.index()))
+  }
+
+  fn prop(
+    first_block: Vec<u8>,
+    rest: Vec<Vec<u8>>,
+    n: usize,
+    update: Vec<u8>,
+  ) -> bool {
+    // Make sure there is at least one block to replace
+    let mut data = rest;
+    data.insert(0, first_block);
+
+    let n = n % data.len();
+    let (_, orig_nodes) = build_mts(&data);
+    let mut new_data = data.clone();
+    let update_is_same = new_data[n] == update;
+    new_data[n] = update;
+    let (_, new_nodes) = build_mts(&new_data);
+
+    let parents = parent_indices(&orig_nodes, n);
+    let (orig_parents, orig_non_parents) = partition(orig_nodes, &parents);
+    let (new_parents, new_non_parents) = partition(new_nodes, &parents);
+
+    assert!(
+      orig_parents
+        .iter()
+        .zip(new_parents.iter())
+        .all(|(orig, new)| orig.index() == new.index())
+    );
+    let parent_hashes_are_ok = orig_parents
+      .iter()
+      .zip(new_parents.iter())
+      .map(|(orig, new)| orig.hash == new.hash)
+      .all(|b| !(update_is_same ^ b));
+    parent_hashes_are_ok && orig_non_parents == new_non_parents
+  }
+  quickcheck(prop as fn(Vec<u8>, Vec<Vec<u8>>, usize, Vec<u8>) -> bool);
 }
