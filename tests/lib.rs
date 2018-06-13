@@ -120,12 +120,10 @@ fn mts_more_nodes() {
   }
 }
 
-fn build_mts(
-  data: &[Vec<u8>],
-) -> (MerkleTreeStream<S, DefaultNode>, Vec<Rc<DefaultNode>>) {
-  let roots = Vec::new();
-  let mut mts = MerkleTreeStream::new(S, roots);
-  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
+fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Rc<DefaultNode>>) {
+  let roots = vec![];
+  let mut mts = MerkleTreeStream::new(H, roots);
+  let mut nodes = vec![];
 
   data.iter().for_each(|bs| mts.next(&bs, &mut nodes));
   (mts, nodes)
@@ -134,10 +132,10 @@ fn build_mts(
 fn all_children(index: usize) -> Box<Iterator<Item = usize>> {
   let self_ = iter::once(index);
   match flat_tree::children(index) {
+    None => Box::new(self_),
     Some((left, right)) => {
       Box::new(self_.chain(all_children(left)).chain(all_children(right)))
     }
-    None => Box::new(self_),
   }
 }
 
@@ -185,7 +183,7 @@ fn roots_are_subset_of_nodes() {
     let (mts, nodes) = build_mts(&data);
     let roots: HashSet<_> =
       mts.roots().iter().map(|root| root.index()).collect();
-    let nodes: HashSet<_> = nodes.iter().map(|node| node.index()).collect();
+    let nodes = nodes.iter().map(|node| node.index()).collect();
 
     roots.is_subset(&nodes)
   }

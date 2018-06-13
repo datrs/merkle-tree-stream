@@ -18,7 +18,7 @@ impl HashMethods for H {
   }
 
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-    let mut buf: Self::Hash = Vec::with_capacity(a.hash().len() + b.hash().len());
+    let mut buf = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
