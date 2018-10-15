@@ -43,7 +43,79 @@ pub trait Node {
   fn hash(&self) -> &[u8];
 }
 
-/// Main constructor. Takes an instance of `HashMethods`.
+/// A stream that generates a merkle tree based on the incoming data.
+///
+/// ## Example
+/// ```rust
+/// use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode};
+/// use std::rc::Rc;
+/// use std::vec::Vec;
+///
+/// struct SimpleXorHashMethods;
+/// impl HashMethods for SimpleXorHashMethods {
+///   type Node = DefaultNode;
+///   type Hash = u8;
+///
+///   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash {
+///     // bitwise XOR the data into u8
+///     leaf.as_ref().unwrap().iter().fold(0, |acc, x| { acc ^ x })
+///   }
+///
+///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
+///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| { acc ^ x })
+///   }
+///
+///   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
+///     Self::Node::from_partial(partial_node, vec![hash])
+///   }
+/// }
+///
+/// let mut mts = MerkleTreeStream::new(SimpleXorHashMethods, Vec::new());
+/// let mut nodes = Vec::new();
+/// mts.next(b"hello", &mut nodes);
+/// mts.next(b"hashed", &mut nodes);
+/// mts.next(b"world", &mut nodes);
+///
+/// /// Constructed tree:
+/// ///
+/// ///   0(hello)-──┐
+/// ///              1
+/// ///   2(hashed)──┘
+/// ///
+/// ///   4(world)
+///
+/// let xor_hello = b"hello".iter().fold(0, |acc, x| { acc ^ x });
+/// let xor_hashed = b"hashed".iter().fold(0, |acc, x| { acc ^ x });
+/// let xor_world = b"world".iter().fold(0, |acc, x| { acc ^ x });
+///
+/// assert_eq!(nodes[0].index, 0);
+/// assert_eq!(nodes[0].parent, 1);
+/// assert_eq!(nodes[0].length, 5);
+/// assert_eq!(nodes[0].data, Some(b"hello".to_vec()));
+/// assert_eq!(nodes[0].hash, vec![xor_hello]);
+///
+/// assert_eq!(nodes[1].index, 2);
+/// assert_eq!(nodes[1].parent, 1);
+/// assert_eq!(nodes[1].length, 6);
+/// assert_eq!(nodes[1].data, Some(b"hashed".to_vec()));
+/// assert_eq!(nodes[1].hash, vec![xor_hashed]);
+///
+/// assert_eq!(nodes[2].index, 1);
+/// assert_eq!(nodes[2].parent, 3);
+/// assert_eq!(nodes[2].length, 11);
+/// assert_eq!(nodes[2].data, None);
+/// assert_eq!(nodes[2].hash, vec![xor_hello ^ xor_hashed]);
+///
+/// assert_eq!(nodes[3].index, 4);
+/// assert_eq!(nodes[3].parent, 5);
+/// assert_eq!(nodes[3].length, 5);
+/// assert_eq!(nodes[3].data, Some(b"world".to_vec()));
+/// assert_eq!(nodes[3].hash, vec![xor_world]);
+///
+/// assert_eq!(mts.roots().len(), 2);
+/// assert_eq!(mts.roots()[0].index, 1);
+/// assert_eq!(mts.roots()[1].index, 4);
+/// ```
 #[derive(Debug)]
 pub struct MerkleTreeStream<T: HashMethods> {
   handler: T,
