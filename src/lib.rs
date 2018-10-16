@@ -51,8 +51,8 @@ pub trait Node {
 /// use std::rc::Rc;
 /// use std::vec::Vec;
 ///
-/// struct SimpleXorHashMethods;
-/// impl HashMethods for SimpleXorHashMethods {
+/// struct XorHashMethods;
+/// impl HashMethods for XorHashMethods {
 ///   type Node = DefaultNode;
 ///   type Hash = u8;
 ///
@@ -70,7 +70,7 @@ pub trait Node {
 ///   }
 /// }
 ///
-/// let mut mts = MerkleTreeStream::new(SimpleXorHashMethods, Vec::new());
+/// let mut mts = MerkleTreeStream::new(XorHashMethods, Vec::new());
 /// let mut nodes = Vec::new();
 /// mts.next(b"hello", &mut nodes);
 /// mts.next(b"hashed", &mut nodes);
