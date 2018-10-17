@@ -1,15 +1,14 @@
+extern crate crypto_hash;
 extern crate flat_tree;
+extern crate hex;
 extern crate merkle_tree_stream;
 extern crate quickcheck;
 
+use crypto_hash::{hex_digest, Algorithm};
 use merkle_tree_stream::{
   DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode,
 };
-extern crate hex;
-extern crate rust_sodium;
-use hex::FromHex;
 use quickcheck::quickcheck;
-use rust_sodium::crypto::hash::sha256;
 use std::collections::HashSet;
 use std::iter;
 use std::rc::Rc;
@@ -21,14 +20,14 @@ impl HashMethods for H {
 
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
     let data = leaf.as_ref().unwrap();
-    sha256::hash(&data).0.to_vec()
+    hex_digest(Algorithm::SHA256, &data).as_bytes().to_vec()
   }
 
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
     let mut buf = Vec::with_capacity(a.hash().len() + b.hash().len());
     buf.extend_from_slice(a.hash());
     buf.extend_from_slice(b.hash());
-    sha256::hash(&buf).0.to_vec()
+    hex_digest(Algorithm::SHA256, &buf).as_bytes().to_vec()
   }
 
   fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
@@ -49,11 +48,9 @@ fn mts_one_node() {
   assert_eq!(5, n.len());
   assert_eq!(0, n.index());
 
-  let expected = <[u8; 32]>::from_hex(
-    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
-  )
-  .unwrap();
-  assert_eq!(expected, n.hash());
+  let expected =
+    "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824";
+  assert_eq!(expected.as_bytes(), n.hash());
 }
 
 #[test]
@@ -70,16 +67,14 @@ fn mts_more_nodes() {
   assert_eq!(3, nodes.len());
 
   // check root node
-  let expected_r = <[u8; 32]>::from_hex(
-    "e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a",
-  )
-  .unwrap();
+  let expected_r =
+    "62af5c3cb8da3e4f25061e829ebeea5c7513c54949115b1acc225930a90154da";
   {
     let rs = mts.roots();
     assert_eq!(1, rs.len());
 
     let r = &rs[0];
-    assert_eq!(expected_r, r.hash());
+    assert_eq!(expected_r.as_bytes(), r.hash());
   }
 
   // add a third one
@@ -94,14 +89,12 @@ fn mts_more_nodes() {
     let rs = mts.roots();
     assert_eq!(2, rs.len());
     let r = &rs[0];
-    assert_eq!(expected_r, r.hash());
+    assert_eq!(expected_r.as_bytes(), r.hash());
 
-    let expected_c = <[u8; 32]>::from_hex(
-      "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
-    )
-    .unwrap();
+    let expected_c =
+      "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6";
     let c = &rs[1];
-    assert_eq!(expected_c, c.hash());
+    assert_eq!(expected_c.as_bytes(), c.hash());
   }
 
   // add a fourth one
@@ -116,11 +109,9 @@ fn mts_more_nodes() {
   {
     let rs = mts.roots();
     let t = &rs[0];
-    let expected_t = <[u8; 32]>::from_hex(
-      "14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7",
-    )
-    .unwrap();
-    assert_eq!(expected_t, t.hash());
+    let expected_t =
+      "58c89d709329eb37285837b042ab6ff72c7c8f74de0446b091b6a0131c102cfd";
+    assert_eq!(expected_t.as_bytes(), t.hash());
   }
 }
 

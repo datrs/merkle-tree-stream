@@ -12,7 +12,6 @@ readme = "README.md"
 flat-tree = "3.3.0"
 
 [dev-dependencies]
-# clippy = "0.0"
-rust_sodium = "0.10.0"
 hex = "0.3.2"
 quickcheck = "0.7.1"
+crypto-hash = "0.3.1"
