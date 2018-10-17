@@ -1,52 +1,39 @@
 extern crate merkle_tree_stream;
-extern crate rust_sodium;
 
 use merkle_tree_stream::{
   DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode,
 };
-use rust_sodium::crypto::hash::sha256;
 use std::rc::Rc;
+use std::vec::Vec;
 
-struct H;
-impl HashMethods for H {
+struct XorHashMethods;
+impl HashMethods for XorHashMethods {
   type Node = DefaultNode;
-  type Hash = Vec<u8>;
+  type Hash = u8;
 
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
-    let data = leaf.as_ref().unwrap();
-    sha256::hash(&data).0.to_vec()
+    // bitwise XOR the data into u8
+    leaf.as_ref().unwrap().iter().fold(0, |acc, x| acc ^ x)
   }
 
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-    let mut buf = Vec::with_capacity(a.hash().len() + b.hash().len());
-    buf.extend_from_slice(a.hash());
-    buf.extend_from_slice(b.hash());
-    sha256::hash(&buf).0.to_vec()
+    Node::hash(a)
+      .iter()
+      .chain(Node::hash(b).iter())
+      .fold(0, |acc, x| acc ^ x)
   }
 
-  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
-    // Cloning the data in the reference because we don't own it.
-    let data = match partial.data() {
-      Some(data) => Some(data.clone()),
-      None => None,
-    };
-
-    Self::Node {
-      index: partial.index(),
-      parent: partial.parent,
-      length: partial.len(),
-      data: data,
-      hash,
-    }
+  fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
+    Self::Node::from_partial(partial_node, vec![hash])
   }
 }
 
 fn main() {
-  let roots = Vec::new();
-  let mut mts = MerkleTreeStream::new(H, roots);
+  let mut mts = MerkleTreeStream::new(XorHashMethods, Vec::new());
   let mut nodes = Vec::new();
   mts.next(b"hello", &mut nodes);
   mts.next(b"hashed", &mut nodes);
   mts.next(b"world", &mut nodes);
-  println!("nodes {:?}", nodes);
+
+  println!("{:?}", nodes);
 }

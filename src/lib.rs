@@ -1,8 +1,37 @@
-#![deny(missing_docs)]
-#![feature(external_doc)]
-#![doc(include = "../README.md")]
-// #![cfg_attr(test, feature(plugin))]
-// #![cfg_attr(test, plugin(clippy))]
+#![forbid(unsafe_code, missing_debug_implementations, missing_docs)]
+#![cfg_attr(test, deny(warnings))]
+
+//! ## Example
+//! ```rust
+//! use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode};
+//! use std::rc::Rc;
+//! use std::vec::Vec;
+//!
+//! struct XorHashMethods;
+//! impl HashMethods for XorHashMethods {
+//!   type Node = DefaultNode;
+//!   type Hash = u8;
+//!
+//!   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash {
+//!     // bitwise XOR the data into u8
+//!     leaf.as_ref().unwrap().iter().fold(0, |acc, x| acc ^ x)
+//!   }
+//!
+//!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
+//!     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
+//!   }
+//!
+//!   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
+//!     Self::Node::from_partial(partial_node, vec![hash])
+//!   }
+//! }
+//!
+//! let mut mts = MerkleTreeStream::new(XorHashMethods, Vec::new());
+//! let mut nodes = Vec::new();
+//! mts.next(b"hello", &mut nodes);
+//! mts.next(b"hashed", &mut nodes);
+//! mts.next(b"world", &mut nodes);
+//! ```
 
 extern crate flat_tree as flat;
 
@@ -58,11 +87,11 @@ pub trait Node {
 ///
 ///   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
-///     leaf.as_ref().unwrap().iter().fold(0, |acc, x| { acc ^ x })
+///     leaf.as_ref().unwrap().iter().fold(0, |acc, x| acc ^ x)
 ///   }
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| { acc ^ x })
+///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
 ///   }
 ///
 ///   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
