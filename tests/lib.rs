@@ -51,7 +51,8 @@ fn mts_one_node() {
 
   let expected = <[u8; 32]>::from_hex(
     "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
-  ).unwrap();
+  )
+  .unwrap();
   assert_eq!(expected, n.hash());
 }
 
@@ -71,7 +72,8 @@ fn mts_more_nodes() {
   // check root node
   let expected_r = <[u8; 32]>::from_hex(
     "e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a",
-  ).unwrap();
+  )
+  .unwrap();
   {
     let rs = mts.roots();
     assert_eq!(1, rs.len());
@@ -96,7 +98,8 @@ fn mts_more_nodes() {
 
     let expected_c = <[u8; 32]>::from_hex(
       "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
-    ).unwrap();
+    )
+    .unwrap();
     let c = &rs[1];
     assert_eq!(expected_c, c.hash());
   }
@@ -115,7 +118,8 @@ fn mts_more_nodes() {
     let t = &rs[0];
     let expected_t = <[u8; 32]>::from_hex(
       "14ede5e8e97ad9372327728f5099b95604a39593cac3bd38a343ad76205213e7",
-    ).unwrap();
+    )
+    .unwrap();
     assert_eq!(expected_t, t.hash());
   }
 }
