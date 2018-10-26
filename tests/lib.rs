@@ -6,7 +6,7 @@ extern crate quickcheck;
 
 use crypto_hash::{hex_digest, Algorithm};
 use merkle_tree_stream::{
-  DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode,
+  DefaultNode, HashMethods, MerkleTreeStream, Node, NodeKind, PartialNode,
 };
 use quickcheck::quickcheck;
 use std::collections::HashSet;
@@ -19,8 +19,12 @@ impl HashMethods for H {
   type Hash = Vec<u8>;
 
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
-    let data = leaf.as_ref().unwrap();
-    hex_digest(Algorithm::SHA256, &data).as_bytes().to_vec()
+    match leaf.data() {
+      NodeKind::Leaf(data) => {
+        hex_digest(Algorithm::SHA256, &data).as_bytes().to_vec()
+      }
+      NodeKind::Parent => vec![],
+    }
   }
 
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
@@ -269,12 +273,10 @@ fn hashes_change_when_data_is_changed() {
     let (orig_parents, orig_non_parents) = partition(orig_nodes, &parents);
     let (new_parents, new_non_parents) = partition(new_nodes, &parents);
 
-    assert!(
-      orig_parents
-        .iter()
-        .zip(new_parents.iter())
-        .all(|(orig, new)| orig.index() == new.index())
-    );
+    assert!(orig_parents
+      .iter()
+      .zip(new_parents.iter())
+      .all(|(orig, new)| orig.index() == new.index()));
     let parent_hashes_are_ok = orig_parents
       .iter()
       .zip(new_parents.iter())
