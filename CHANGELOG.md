@@ -1,3 +1,22 @@
+## 2018-10-28, Version 0.8.0
+### Commits
+- [[`b6096eacff`](https://github.com/datrs/merkle-tree-stream/commit/b6096eacffc96765271307cbf30bd613b414b4af)] (cargo-release) version 0.8.0 (Yoshua Wuyts)
+- [[`770347ec82`](https://github.com/datrs/merkle-tree-stream/commit/770347ec82cdd5bf5b207088be2535f76364576f)] Use NodeKind enum instead of Option for PartialNode data (#18) (Scott Trinh)
+- [[`04b163a5d1`](https://github.com/datrs/merkle-tree-stream/commit/04b163a5d1ccb06f995576152280bde5241c0ef4)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md        | 25 +++++++++++++++++++++++++
+ Cargo.toml          |  2 +-
+ examples/main.rs    |  7 +++++--
+ src/default_node.rs |  6 +++---
+ src/lib.rs          | 24 +++++++++++++++---------
+ src/partial_node.rs | 14 +++++++++++---
+ tests/lib.rs        | 20 +++++++++++---------
+ 7 files changed, 71 insertions(+), 27 deletions(-)
+```
+
+
 ## 2018-10-17, Version 0.7.0
 ### Commits
 - [[`8fe517e043`](https://github.com/datrs/merkle-tree-stream/commit/8fe517e0432d35563c3f89956a7065ec3cbdb9ef)] (cargo-release) version 0.7.0 (Yoshua Wuyts)
