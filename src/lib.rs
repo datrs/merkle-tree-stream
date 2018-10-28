@@ -3,7 +3,7 @@
 
 //! ## Example
 //! ```rust
-//! use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode};
+//! use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode, NodeKind};
 //! use std::rc::Rc;
 //! use std::vec::Vec;
 //!
@@ -12,9 +12,12 @@
 //!   type Node = DefaultNode;
 //!   type Hash = u8;
 //!
-//!   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash {
+//!   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 //!     // bitwise XOR the data into u8
-//!     leaf.as_ref().unwrap().iter().fold(0, |acc, x| acc ^ x)
+//!     match leaf.data() {
+//!       NodeKind::Parent => 0,
+//!       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
+//!     }
 //!   }
 //!
 //!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
@@ -39,7 +42,7 @@ mod default_node;
 mod partial_node;
 
 pub use default_node::DefaultNode;
-pub use partial_node::PartialNode;
+pub use partial_node::{NodeKind, PartialNode};
 
 use std::rc::Rc;
 
@@ -76,7 +79,7 @@ pub trait Node {
 ///
 /// ## Example
 /// ```rust
-/// use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode};
+/// use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode, NodeKind};
 /// use std::rc::Rc;
 /// use std::vec::Vec;
 ///
@@ -85,9 +88,12 @@ pub trait Node {
 ///   type Node = DefaultNode;
 ///   type Hash = u8;
 ///
-///   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash {
+///   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
-///     leaf.as_ref().unwrap().iter().fold(0, |acc, x| acc ^ x)
+///     match leaf.data() {
+///       NodeKind::Parent => 0,
+///       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
+///     }
 ///   }
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
@@ -172,7 +178,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
       index,
       parent: flat::parent(index) as usize,
       length: data.len(),
-      data: Some(data.to_vec()),
+      data: NodeKind::Leaf(data.to_vec()),
     };
 
     let hash = self.handler.leaf(&leaf, &self.roots);
@@ -195,7 +201,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
           index: left.parent(),
           parent: flat::parent(left.parent()) as usize,
           length: left.len() + right.len(),
-          data: None,
+          data: NodeKind::Parent,
         };
 
         self.handler.node(&partial, hash)

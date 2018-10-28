@@ -1,4 +1,4 @@
-use super::{Node, PartialNode};
+use super::{Node, NodeKind, PartialNode};
 use std::ops::{Deref, DerefMut};
 
 /// Node representation.
@@ -20,8 +20,8 @@ impl DefaultNode {
   /// Convert a `PartialNode` to a `Node`.
   pub fn from_partial(partial: &PartialNode, hash: Vec<u8>) -> Self {
     let data = match partial.data() {
-      Some(data) => Some(data.clone()),
-      None => None,
+      NodeKind::Leaf(data) => Some(data.clone()),
+      NodeKind::Parent => None,
     };
 
     Self {
