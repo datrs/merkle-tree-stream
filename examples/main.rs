@@ -25,10 +25,6 @@ impl HashMethods for XorHashMethods {
       .chain(Node::hash(b).iter())
       .fold(0, |acc, x| acc ^ x)
   }
-
-  fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-    Self::Node::from_partial(partial_node, vec![hash])
-  }
 }
 
 fn main() {

@@ -33,10 +33,6 @@ impl HashMethods for H {
     buf.extend_from_slice(b.hash());
     hex_digest(Algorithm::SHA256, &buf).as_bytes().to_vec()
   }
-
-  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
-    DefaultNode::from_partial(partial, hash)
-  }
 }
 
 #[test]
