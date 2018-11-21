@@ -23,10 +23,6 @@
 //!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
 //!     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
 //!   }
-//!
-//!   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-//!     Self::Node::from_partial(partial_node, vec![hash])
-//!   }
 //! }
 //!
 //! let mut mts = MerkleTreeStream::new(XorHashMethods, Vec::new());
@@ -103,10 +99,6 @@ pub trait Node {
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
 ///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
-///   }
-///
-///   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-///     Self::Node::from_partial(partial_node, vec![hash])
 ///   }
 /// }
 ///
