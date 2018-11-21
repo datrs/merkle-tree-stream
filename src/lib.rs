@@ -179,10 +179,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
     };
 
     let hash = self.handler.leaf(&leaf, &self.roots);
-    let parts = NodeParts {
-      node: leaf,
-      hash: hash,
-    };
+    let parts = NodeParts { node: leaf, hash };
     let node = Rc::new(H::Node::from(parts));
 
     self.roots.push(Rc::clone(&node));
@@ -207,7 +204,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
 
         H::Node::from(NodeParts {
           node: partial,
-          hash: hash,
+          hash,
         })
       };
 
