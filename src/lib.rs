@@ -10,18 +10,18 @@
 //! struct XorHashMethods;
 //! impl HashMethods for XorHashMethods {
 //!   type Node = DefaultNode;
-//!   type Hash = u8;
+//!   type Hash = Vec<u8>;
 //!
 //!   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 //!     // bitwise XOR the data into u8
-//!     match leaf.data() {
+//!     vec![match leaf.data() {
 //!       NodeKind::Parent => 0,
 //!       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-//!     }
+//!     }]
 //!   }
 //!
 //!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-//!     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
+//!     vec![Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)]
 //!   }
 //! }
 //!
@@ -87,18 +87,18 @@ pub trait Node {
 /// struct XorHashMethods;
 /// impl HashMethods for XorHashMethods {
 ///   type Node = DefaultNode;
-///   type Hash = u8;
+///   type Hash = Vec<u8>;
 ///
 ///   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
-///     match leaf.data() {
+///     vec![match leaf.data() {
 ///       NodeKind::Parent => 0,
 ///       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-///     }
+///     }]
 ///   }
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
+///     vec![Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)]
 ///   }
 /// }
 ///

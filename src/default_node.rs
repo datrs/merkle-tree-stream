@@ -62,12 +62,6 @@ impl From<NodeParts<Vec<u8>>> for DefaultNode {
   }
 }
 
-impl From<NodeParts<u8>> for DefaultNode {
-  fn from(parts: NodeParts<u8>) -> DefaultNode {
-    DefaultNode::from_partial(&parts.node, vec![parts.hash])
-  }
-}
-
 impl Deref for DefaultNode {
   type Target = Option<Vec<u8>>;
   fn deref(&self) -> &Self::Target {
