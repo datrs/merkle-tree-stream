@@ -14,14 +14,16 @@
 //!
 //!   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 //!     // bitwise XOR the data into u8
-//!     vec![match leaf.data() {
+//!     let hash = match leaf.data() {
 //!       NodeKind::Parent => 0,
 //!       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-//!     }]
+//!     };
+//!     vec![hash]
 //!   }
 //!
 //!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-//!     vec![Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)]
+//!     let hash = Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x);
+//!     vec![hash]
 //!   }
 //! }
 //!
@@ -91,14 +93,16 @@ pub trait Node {
 ///
 ///   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
-///     vec![match leaf.data() {
+///     let hash = match leaf.data() {
 ///       NodeKind::Parent => 0,
 ///       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-///     }]
+///     };
+///     vec![hash]
 ///   }
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-///     vec![Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)]
+///     let hash = Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x);
+///     vec![hash]
 ///   }
 /// }
 ///
