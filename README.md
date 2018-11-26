@@ -59,9 +59,9 @@ fn main() {
 ### Custom `Node` or `Hash` types
 
 If you have a specific need for a `Node` type that is not covered by the
-`DefaultNode` type, you can define your own `Node` type by implementing the
-`Node` trait and the appropriate `From<NodeParts<Self::Hash>>` trait for your
-custom type. You can use the `DefaultNode` implementation as a guide.
+`DefaultNode` type, you can define your own by implementing the `Node` trait and
+the appropriate `From<NodeParts<Self::Hash>>` trait for your new type. You can
+use the `DefaultNode` implementation as a guide.
 
 ## Installation
 ```sh
