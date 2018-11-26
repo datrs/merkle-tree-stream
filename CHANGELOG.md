@@ -1,3 +1,22 @@
+## 2018-11-26, Version 0.9.0
+### Commits
+- [[`d7f3fddd69`](https://github.com/datrs/merkle-tree-stream/commit/d7f3fddd6973bd3f2c5b696390f3e84a4589dfb7)] (cargo-release) version 0.9.0 (Yoshua Wuyts)
+- [[`c2bfa8c81a`](https://github.com/datrs/merkle-tree-stream/commit/c2bfa8c81a9a34ff9c314d6fd698d286724af809)] Contrain Node as: From<NodeParts> (#21) (Scott Trinh)
+- [[`83fa0f313e`](https://github.com/datrs/merkle-tree-stream/commit/83fa0f313e251d714aac7718eaad0d524d6cdf37)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md        | 19 +++++++++++++++++++
+ Cargo.toml          |  2 +-
+ README.md           | 11 +++++++----
+ examples/main.rs    | 16 +++++++---------
+ src/default_node.rs |  8 +++++++-
+ src/lib.rs          | 47 ++++++++++++++++++++++++++---------------------
+ tests/lib.rs        |  4 ----
+ 7 files changed, 67 insertions(+), 40 deletions(-)
+```
+
+
 ## 2018-10-28, Version 0.8.0
 ### Commits
 - [[`b6096eacff`](https://github.com/datrs/merkle-tree-stream/commit/b6096eacffc96765271307cbf30bd613b414b4af)] (cargo-release) version 0.8.0 (Yoshua Wuyts)
