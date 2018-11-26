@@ -43,10 +43,6 @@ impl HashMethods for H {
     buf.extend_from_slice(b.hash());
     sha256::hash(&buf).0.to_vec()
   }
-
-  fn node(&self, partial: &PartialNode, hash: Self::Hash) -> Self::Node {
-    Self::Node::from_partial(partial, hash)
-  }
 }
 
 fn main() {
@@ -59,6 +55,13 @@ fn main() {
   println!("nodes {:?}", nodes);
 }
 ```
+
+### Custom `Node` or `Hash` types
+
+If you have a specific need for a `Node` type that is not covered by the
+`DefaultNode` type, you can define your own by implementing the `Node` trait and
+the appropriate `From<NodeParts<Self::Hash>>` trait for your new type. You can
+use the `DefaultNode` implementation as a guide.
 
 ## Installation
 ```sh

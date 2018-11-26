@@ -9,25 +9,23 @@ use std::vec::Vec;
 struct XorHashMethods;
 impl HashMethods for XorHashMethods {
   type Node = DefaultNode;
-  type Hash = u8;
+  type Hash = Vec<u8>;
 
   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
     // bitwise XOR the data into u8
-    match leaf.data() {
+    let hash = match leaf.data() {
       NodeKind::Parent => 0,
       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-    }
+    };
+    vec![hash]
   }
 
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-    Node::hash(a)
+    let hash = Node::hash(a)
       .iter()
       .chain(Node::hash(b).iter())
-      .fold(0, |acc, x| acc ^ x)
-  }
-
-  fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-    Self::Node::from_partial(partial_node, vec![hash])
+      .fold(0, |acc, x| acc ^ x);
+    vec![hash]
   }
 }
 

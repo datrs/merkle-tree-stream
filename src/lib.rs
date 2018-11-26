@@ -10,22 +10,20 @@
 //! struct XorHashMethods;
 //! impl HashMethods for XorHashMethods {
 //!   type Node = DefaultNode;
-//!   type Hash = u8;
+//!   type Hash = Vec<u8>;
 //!
 //!   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 //!     // bitwise XOR the data into u8
-//!     match leaf.data() {
+//!     let hash = match leaf.data() {
 //!       NodeKind::Parent => 0,
 //!       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-//!     }
+//!     };
+//!     vec![hash]
 //!   }
 //!
 //!   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-//!     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
-//!   }
-//!
-//!   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-//!     Self::Node::from_partial(partial_node, vec![hash])
+//!     let hash = Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x);
+//!     vec![hash]
 //!   }
 //! }
 //!
@@ -46,18 +44,23 @@ pub use partial_node::{NodeKind, PartialNode};
 
 use std::rc::Rc;
 
+/// The parts that make up a full Node from a PartialNode
+#[derive(Debug)]
+pub struct NodeParts<H> {
+  node: PartialNode,
+  hash: H,
+}
+
 /// Functions that need to be implemented for `MerkleTreeStream`.
 pub trait HashMethods {
   /// The Node type we'll iterate over.
-  type Node: Node;
+  type Node: Node + From<NodeParts<Self::Hash>>;
   /// The type of hash returned from the hashing functions.
   type Hash;
   /// Pass data through a hash function.
   fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash;
   /// Pass hashes through a hash function.
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash;
-  /// Combine a `PartialNode` and a `Hash` to a `Node` type.
-  fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node;
 }
 
 /// Functions that need to be implemented for the Data that `MerkleTreeStream`
@@ -86,22 +89,20 @@ pub trait Node {
 /// struct XorHashMethods;
 /// impl HashMethods for XorHashMethods {
 ///   type Node = DefaultNode;
-///   type Hash = u8;
+///   type Hash = Vec<u8>;
 ///
 ///   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
-///     match leaf.data() {
+///     let hash = match leaf.data() {
 ///       NodeKind::Parent => 0,
 ///       NodeKind::Leaf(data) => data.iter().fold(0, |acc, x| acc ^ x),
-///     }
+///     };
+///     vec![hash]
 ///   }
 ///
 ///   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash {
-///     Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x)
-///   }
-///
-///   fn node(&self, partial_node: &PartialNode, hash: Self::Hash) -> Self::Node {
-///     Self::Node::from_partial(partial_node, vec![hash])
+///     let hash = Node::hash(a).iter().chain(Node::hash(b).iter()).fold(0, |acc, x| acc ^ x);
+///     vec![hash]
 ///   }
 /// }
 ///
@@ -182,7 +183,8 @@ impl<H: HashMethods> MerkleTreeStream<H> {
     };
 
     let hash = self.handler.leaf(&leaf, &self.roots);
-    let node = Rc::new(self.handler.node(&leaf, hash));
+    let parts = NodeParts { node: leaf, hash };
+    let node = Rc::new(H::Node::from(parts));
 
     self.roots.push(Rc::clone(&node));
     nodes.push(Rc::clone(&node));
@@ -204,7 +206,10 @@ impl<H: HashMethods> MerkleTreeStream<H> {
           data: NodeKind::Parent,
         };
 
-        self.handler.node(&partial, hash)
+        H::Node::from(NodeParts {
+          node: partial,
+          hash,
+        })
       };
 
       for _ in 0..2 {

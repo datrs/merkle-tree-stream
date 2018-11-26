@@ -1,4 +1,4 @@
-use super::{Node, NodeKind, PartialNode};
+use super::{Node, NodeKind, NodeParts, PartialNode};
 use std::ops::{Deref, DerefMut};
 
 /// Node representation.
@@ -53,6 +53,12 @@ impl Node for DefaultNode {
 
   fn parent(&self) -> usize {
     self.parent
+  }
+}
+
+impl From<NodeParts<Vec<u8>>> for DefaultNode {
+  fn from(parts: NodeParts<Vec<u8>>) -> DefaultNode {
+    DefaultNode::from_partial(&parts.node, parts.hash)
   }
 }
 
