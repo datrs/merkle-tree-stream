@@ -13,5 +13,5 @@ flat-tree = "3.3.0"
 
 [dev-dependencies]
 hex = "0.3.2"
-quickcheck = "0.7.1"
+quickcheck = "0.8.0"
 crypto-hash = "0.3.1"
