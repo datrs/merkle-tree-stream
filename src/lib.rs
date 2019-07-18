@@ -51,6 +51,28 @@ pub struct NodeParts<H> {
   hash: H,
 }
 
+impl<H> NodeParts<H> {
+  /// Access the `node` property.
+  pub fn node(&self) -> &PartialNode {
+    &self.node
+  }
+
+  /// Access the `node` property mutably.
+  pub fn node_mut(&mut self) -> &mut PartialNode {
+    &mut self.node
+  }
+
+  /// Access the `hash` property.
+  pub fn hash(&self) -> &H {
+    &self.hash
+  }
+
+  /// Access the `hash` property mutably.
+  pub fn hash_mut(&mut self) -> &mut H {
+    &mut self.hash
+  }
+}
+
 /// Functions that need to be implemented for `MerkleTreeStream`.
 pub trait HashMethods {
   /// The Node type we'll iterate over.
