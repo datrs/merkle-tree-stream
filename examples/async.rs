@@ -2,7 +2,7 @@ use async_std::task;
 use merkle_tree_stream::{
   DefaultNode, HashMethods, MerkleTreeStream, Node, NodeKind, PartialNode,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
 
 struct XorHashMethods;
@@ -10,7 +10,7 @@ impl HashMethods for XorHashMethods {
   type Node = DefaultNode;
   type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
     // bitwise XOR the data into u8
     let hash = match leaf.data() {
       NodeKind::Parent => 0,
@@ -31,9 +31,9 @@ impl HashMethods for XorHashMethods {
 async fn append<H: HashMethods>(
   mts: &mut MerkleTreeStream<H>,
   content: &[u8],
-  nodes: &mut Vec<Rc<H::Node>>,
+  nodes: &mut Vec<Arc<H::Node>>,
 ) {
-  mts.next(b"hello", nodes);
+  mts.next(content, nodes);
 }
 
 fn main() {

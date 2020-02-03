@@ -3,7 +3,7 @@ extern crate merkle_tree_stream;
 use merkle_tree_stream::{
   DefaultNode, HashMethods, MerkleTreeStream, Node, NodeKind, PartialNode,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
 
 struct XorHashMethods;
@@ -11,7 +11,7 @@ impl HashMethods for XorHashMethods {
   type Node = DefaultNode;
   type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
     // bitwise XOR the data into u8
     let hash = match leaf.data() {
       NodeKind::Parent => 0,
