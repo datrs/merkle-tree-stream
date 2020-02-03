@@ -124,7 +124,7 @@ fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Rc<DefaultNode>>) {
   (mts, nodes)
 }
 
-fn all_children(index: usize) -> Box<Iterator<Item = usize>> {
+fn all_children(index: usize) -> Box<dyn Iterator<Item = usize>> {
   let self_ = iter::once(index);
   match flat_tree::children(index) {
     None => Box::new(self_),
