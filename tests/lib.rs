@@ -11,14 +11,14 @@ use merkle_tree_stream::{
 use quickcheck::quickcheck;
 use std::collections::HashSet;
 use std::iter;
-use std::rc::Rc;
+use std::sync::Arc;
 
 struct H;
 impl HashMethods for H {
   type Node = DefaultNode;
   type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
     match leaf.data() {
       NodeKind::Leaf(data) => {
         hex_digest(Algorithm::SHA256, &data).as_bytes().to_vec()
@@ -39,7 +39,7 @@ impl HashMethods for H {
 fn mts_one_node() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(H, roots);
-  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
+  let mut nodes: Vec<Arc<DefaultNode>> = Vec::new();
   mts.next(b"hello", &mut nodes);
   assert_eq!(1, nodes.len());
 
@@ -57,7 +57,7 @@ fn mts_one_node() {
 fn mts_more_nodes() {
   let roots = Vec::new();
   let mut mts = MerkleTreeStream::new(H, roots);
-  let mut nodes: Vec<Rc<DefaultNode>> = Vec::new();
+  let mut nodes: Vec<Arc<DefaultNode>> = Vec::new();
   mts.next(b"a", &mut nodes);
   mts.next(b"b", &mut nodes);
 
@@ -115,7 +115,7 @@ fn mts_more_nodes() {
   }
 }
 
-fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Rc<DefaultNode>>) {
+fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Arc<DefaultNode>>) {
   let roots = vec![];
   let mut mts = MerkleTreeStream::new(H, roots);
   let mut nodes = vec![];
@@ -124,7 +124,7 @@ fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Rc<DefaultNode>>) {
   (mts, nodes)
 }
 
-fn all_children(index: usize) -> Box<Iterator<Item = usize>> {
+fn all_children(index: usize) -> Box<dyn Iterator<Item = usize>> {
   let self_ = iter::once(index);
   match flat_tree::children(index) {
     None => Box::new(self_),
@@ -218,7 +218,7 @@ fn all_leaves_contain_data() {
 #[test]
 fn hashes_change_when_data_is_changed() {
   /// Finds the parent indices (in-tree IDs) of the nth data block
-  fn parent_indices(nodes: &[Rc<DefaultNode>], n: usize) -> HashSet<usize> {
+  fn parent_indices(nodes: &[Arc<DefaultNode>], n: usize) -> HashSet<usize> {
     let modified_node_index = nodes
       .iter()
       .filter(|node| node.data.is_some())
@@ -240,9 +240,9 @@ fn hashes_change_when_data_is_changed() {
   }
 
   fn partition(
-    nodes: Vec<Rc<DefaultNode>>,
+    nodes: Vec<Arc<DefaultNode>>,
     indices: &HashSet<usize>,
-  ) -> (Vec<Rc<DefaultNode>>, Vec<Rc<DefaultNode>>) {
+  ) -> (Vec<Arc<DefaultNode>>, Vec<Arc<DefaultNode>>) {
     nodes
       .into_iter()
       .partition(|node| indices.contains(&node.index()))

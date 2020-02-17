@@ -4,7 +4,7 @@
 //! ## Example
 //! ```rust
 //! use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode, NodeKind};
-//! use std::rc::Rc;
+//! use std::sync::Arc;
 //! use std::vec::Vec;
 //!
 //! struct XorHashMethods;
@@ -12,7 +12,7 @@
 //!   type Node = DefaultNode;
 //!   type Hash = Vec<u8>;
 //!
-//!   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+//!   fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
 //!     // bitwise XOR the data into u8
 //!     let hash = match leaf.data() {
 //!       NodeKind::Parent => 0,
@@ -39,10 +39,10 @@ extern crate flat_tree as flat;
 mod default_node;
 mod partial_node;
 
-pub use default_node::DefaultNode;
-pub use partial_node::{NodeKind, PartialNode};
+pub use crate::default_node::DefaultNode;
+pub use crate::partial_node::{NodeKind, PartialNode};
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// The parts that make up a full Node from a PartialNode
 #[derive(Debug)]
@@ -80,7 +80,7 @@ pub trait HashMethods {
   /// The type of hash returned from the hashing functions.
   type Hash;
   /// Pass data through a hash function.
-  fn leaf(&self, leaf: &PartialNode, roots: &[Rc<Self::Node>]) -> Self::Hash;
+  fn leaf(&self, leaf: &PartialNode, roots: &[Arc<Self::Node>]) -> Self::Hash;
   /// Pass hashes through a hash function.
   fn parent(&self, a: &Self::Node, b: &Self::Node) -> Self::Hash;
 }
@@ -105,7 +105,7 @@ pub trait Node {
 /// ## Example
 /// ```rust
 /// use merkle_tree_stream::{DefaultNode, HashMethods, MerkleTreeStream, Node, PartialNode, NodeKind};
-/// use std::rc::Rc;
+/// use std::sync::Arc;
 /// use std::vec::Vec;
 ///
 /// struct XorHashMethods;
@@ -113,7 +113,7 @@ pub trait Node {
 ///   type Node = DefaultNode;
 ///   type Hash = Vec<u8>;
 ///
-///   fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+///   fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
 ///     // bitwise XOR the data into u8
 ///     let hash = match leaf.data() {
 ///       NodeKind::Parent => 0,
@@ -177,13 +177,13 @@ pub trait Node {
 #[derive(Debug)]
 pub struct MerkleTreeStream<T: HashMethods> {
   handler: T,
-  roots: Vec<Rc<T::Node>>,
+  roots: Vec<Arc<T::Node>>,
   blocks: usize,
 }
 
 impl<H: HashMethods> MerkleTreeStream<H> {
   /// Create a new MerkleTreeStream instance.
-  pub fn new(handler: H, roots: Vec<Rc<H::Node>>) -> MerkleTreeStream<H> {
+  pub fn new(handler: H, roots: Vec<Arc<H::Node>>) -> MerkleTreeStream<H> {
     MerkleTreeStream {
       handler,
       roots,
@@ -193,7 +193,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
 
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
-  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Rc<H::Node>>) {
+  pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Arc<H::Node>>) {
     let index: usize = 2 * self.blocks;
     self.blocks += 1;
 
@@ -206,10 +206,10 @@ impl<H: HashMethods> MerkleTreeStream<H> {
 
     let hash = self.handler.leaf(&leaf, &self.roots);
     let parts = NodeParts { node: leaf, hash };
-    let node = Rc::new(H::Node::from(parts));
+    let node = Arc::new(H::Node::from(parts));
 
-    self.roots.push(Rc::clone(&node));
-    nodes.push(Rc::clone(&node));
+    self.roots.push(Arc::clone(&node));
+    nodes.push(Arc::clone(&node));
 
     while self.roots.len() > 1 {
       let leaf = {
@@ -238,14 +238,14 @@ impl<H: HashMethods> MerkleTreeStream<H> {
         self.roots.pop();
       }
 
-      let leaf = Rc::new(leaf);
-      self.roots.push(Rc::clone(&leaf));
-      nodes.push(Rc::clone(&leaf));
+      let leaf = Arc::new(leaf);
+      self.roots.push(Arc::clone(&leaf));
+      nodes.push(Arc::clone(&leaf));
     }
   }
 
   /// Get the roots vector.
-  pub fn roots(&self) -> &Vec<Rc<H::Node>> {
+  pub fn roots(&self) -> &Vec<Arc<H::Node>> {
     &self.roots
   }
 }

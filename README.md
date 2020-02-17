@@ -25,14 +25,14 @@ extern crate rust_sodium;
 use merkle_tree_stream::{HashMethods, DefaultNode, MerkleTreeStream, Node,
                         PartialNode};
 use rust_sodium::crypto::hash::sha256;
-use std::rc::Rc;
+use std::sync::Arc;
 
 struct H;
 impl HashMethods for H {
   type Node = DefaultNode;
   type Hash = Vec<u8>;
 
-  fn leaf(&self, leaf: &PartialNode, _roots: &[Rc<Self::Node>]) -> Self::Hash {
+  fn leaf(&self, leaf: &PartialNode, _roots: &[Arc<Self::Node>]) -> Self::Hash {
     let data = leaf.as_ref().unwrap();
     sha256::hash(&data).0.to_vec()
   }
