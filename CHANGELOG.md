@@ -1,3 +1,24 @@
+## 2020-02-18, Version 0.11.0
+### Commits
+- [[`7582272d2c`](https://github.com/datrs/merkle-tree-stream/commit/7582272d2c117d8413768219ccff60988ec87aa7)] (cargo-release) version 0.11.0 (Bruno Tavares)
+- [[`5452a3af65`](https://github.com/datrs/merkle-tree-stream/commit/5452a3af6545029ed6f719f42b1eee300065446f)] Make structures Send (#28) (Bruno Tavares)
+- [[`9790978c22`](https://github.com/datrs/merkle-tree-stream/commit/9790978c224e4afc6208602f5be75a797a1a1df1)] Update hex requirement from 0.3.2 to 0.4.0 (dependabot-preview[bot])
+- [[`9b09398359`](https://github.com/datrs/merkle-tree-stream/commit/9b093983598c5ad7d1c6ff7a7586c392b43e8a15)] Update quickcheck requirement from 0.8.1 to 0.9.0 (dependabot-preview[bot])
+- [[`0e15f1fff2`](https://github.com/datrs/merkle-tree-stream/commit/0e15f1fff23ade27f4c43b6b5a1863770e175aad)] Update changelog (Yoshua Wuyts)
+
+### Stats
+```diff
+ CHANGELOG.md      | 19 +++++++++++++++++++
+ Cargo.toml        |  8 +++++---
+ README.md         |  4 ++--
+ examples/async.rs | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+ examples/main.rs  |  4 ++--
+ src/lib.rs        | 36 ++++++++++++++++++------------------
+ tests/lib.rs      | 18 +++++++++---------
+ 7 files changed, 104 insertions(+), 34 deletions(-)
+```
+
+
 ## 2018-11-26, Version 0.9.0
 ### Commits
 - [[`d7f3fddd69`](https://github.com/datrs/merkle-tree-stream/commit/d7f3fddd6973bd3f2c5b696390f3e84a4589dfb7)] (cargo-release) version 0.9.0 (Yoshua Wuyts)
