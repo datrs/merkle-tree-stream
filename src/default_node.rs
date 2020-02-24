@@ -5,15 +5,15 @@ use std::ops::{Deref, DerefMut};
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct DefaultNode {
   /// Reference to this node's parent node.
-  pub parent: usize,
+  pub parent: u64,
   /// Data if it's a leaf node, nothing if it's a parent node.
   pub data: Option<Vec<u8>>,
   /// Hash of the data
   pub hash: Vec<u8>,
   /// Total size of all its child nodes combined.
-  pub length: usize,
+  pub length: u64,
   /// Offset into the flat-tree data structure.
-  pub index: usize,
+  pub index: u64,
 }
 
 impl DefaultNode {
@@ -39,7 +39,7 @@ impl Node for DefaultNode {
     &self.hash
   }
 
-  fn len(&self) -> usize {
+  fn len(&self) -> u64 {
     self.length
   }
 
@@ -47,11 +47,11 @@ impl Node for DefaultNode {
     self.length == 0
   }
 
-  fn index(&self) -> usize {
+  fn index(&self) -> u64 {
     self.index
   }
 
-  fn parent(&self) -> usize {
+  fn parent(&self) -> u64 {
     self.parent
   }
 }
