@@ -89,13 +89,13 @@ pub trait HashMethods {
 /// works with.
 pub trait Node {
   /// Get the length of the node.
-  fn len(&self) -> usize;
+  fn len(&self) -> u64;
   /// Check if the length is zero.
   fn is_empty(&self) -> bool;
   /// Get the position of the parent of the node.
-  fn parent(&self) -> usize;
+  fn parent(&self) -> u64;
   /// Get the position at which the node was found.
-  fn index(&self) -> usize;
+  fn index(&self) -> u64;
   /// Get the hash contained in the node.
   fn hash(&self) -> &[u8];
 }
@@ -178,7 +178,7 @@ pub trait Node {
 pub struct MerkleTreeStream<T: HashMethods> {
   handler: T,
   roots: Vec<Arc<T::Node>>,
-  blocks: usize,
+  blocks: u64,
 }
 
 impl<H: HashMethods> MerkleTreeStream<H> {
@@ -194,13 +194,13 @@ impl<H: HashMethods> MerkleTreeStream<H> {
   /// Pass a string buffer through the flat-tree hash functions, and write the
   /// result back out to "nodes".
   pub fn next<'a>(&mut self, data: &[u8], nodes: &'a mut Vec<Arc<H::Node>>) {
-    let index: usize = 2 * self.blocks;
+    let index: u64 = 2 * self.blocks;
     self.blocks += 1;
 
     let leaf = PartialNode {
       index,
-      parent: flat::parent(index) as usize,
-      length: data.len(),
+      parent: flat::parent(index) as u64,
+      length: data.len() as u64,
       data: NodeKind::Leaf(data.to_vec()),
     };
 
@@ -223,7 +223,7 @@ impl<H: HashMethods> MerkleTreeStream<H> {
         let hash = self.handler.parent(left, right);
         let partial = PartialNode {
           index: left.parent(),
-          parent: flat::parent(left.parent()) as usize,
+          parent: flat::parent(left.parent()) as u64,
           length: left.len() + right.len(),
           data: NodeKind::Parent,
         };

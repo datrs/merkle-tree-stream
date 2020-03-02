@@ -124,7 +124,7 @@ fn build_mts(data: &[Vec<u8>]) -> (MerkleTreeStream<H>, Vec<Arc<DefaultNode>>) {
   (mts, nodes)
 }
 
-fn all_children(index: usize) -> Box<dyn Iterator<Item = usize>> {
+fn all_children(index: u64) -> Box<dyn Iterator<Item = u64>> {
   let self_ = iter::once(index);
   match flat_tree::children(index) {
     None => Box::new(self_),
@@ -218,7 +218,7 @@ fn all_leaves_contain_data() {
 #[test]
 fn hashes_change_when_data_is_changed() {
   /// Finds the parent indices (in-tree IDs) of the nth data block
-  fn parent_indices(nodes: &[Arc<DefaultNode>], n: usize) -> HashSet<usize> {
+  fn parent_indices(nodes: &[Arc<DefaultNode>], n: usize) -> HashSet<u64> {
     let modified_node_index = nodes
       .iter()
       .filter(|node| node.data.is_some())
@@ -241,7 +241,7 @@ fn hashes_change_when_data_is_changed() {
 
   fn partition(
     nodes: Vec<Arc<DefaultNode>>,
-    indices: &HashSet<usize>,
+    indices: &HashSet<u64>,
   ) -> (Vec<Arc<DefaultNode>>, Vec<Arc<DefaultNode>>) {
     nodes
       .into_iter()

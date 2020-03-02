@@ -13,19 +13,19 @@ pub enum NodeKind {
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 pub struct PartialNode {
   /// Reference to this node's parent node.
-  pub parent: usize,
+  pub parent: u64,
   /// Data if it's a leaf node, nothing if it's a parent node.
   pub(crate) data: NodeKind,
   /// Total size of all its child nodes combined.
-  pub(crate) length: usize,
+  pub(crate) length: u64,
   /// Offset into the flat-tree data structure.
-  pub(crate) index: usize,
+  pub(crate) index: u64,
 }
 
 impl PartialNode {
   /// Returns the number of elements in the Node, also referred to as its
   /// 'length'.
-  pub fn len(&self) -> usize {
+  pub fn len(&self) -> u64 {
     self.length
   }
 
@@ -35,7 +35,7 @@ impl PartialNode {
   }
 
   /// Get the current index into the stream.
-  pub fn index(&self) -> usize {
+  pub fn index(&self) -> u64 {
     self.index
   }
   /// Get the data from the thingy.
