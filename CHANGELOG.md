@@ -1,3 +1,23 @@
+## 2020-03-03, Version 0.12.0
+### Commits
+- [[`9779383689`](https://github.com/datrs/merkle-tree-stream/commit/9779383689adaa88b9fafc04d43c7055fcdaf2e5)] (cargo-release) version 0.12.0 (Bruno Tavares)
+- [[`a15ebae355`](https://github.com/datrs/merkle-tree-stream/commit/a15ebae355e329ab00cebc26df5055d7f60f411d)] Point flat-tree to crates version (Bruno Tavares)
+- [[`5e24897cc4`](https://github.com/datrs/merkle-tree-stream/commit/5e24897cc4f0e4bbb7d2d230ccdfdda69f8260b6)] Change from usize to u64 (#29) (Bruno Tavares)
+- [[`18f5f2f2ad`](https://github.com/datrs/merkle-tree-stream/commit/18f5f2f2adbb07ba79f4928b40e14a5f6ab10a9a)] Update changelog (Bruno Tavares)
+
+### Stats
+```diff
+ .travis.yml         |  6 +++---
+ CHANGELOG.md        | 21 +++++++++++++++++++++
+ Cargo.toml          | 10 +++++-----
+ src/default_node.rs | 12 ++++++------
+ src/lib.rs          | 16 ++++++++--------
+ src/partial_node.rs | 10 +++++-----
+ tests/lib.rs        |  6 +++---
+ 7 files changed, 51 insertions(+), 30 deletions(-)
+```
+
+
 ## 2020-02-18, Version 0.11.0
 ### Commits
 - [[`7582272d2c`](https://github.com/datrs/merkle-tree-stream/commit/7582272d2c117d8413768219ccff60988ec87aa7)] (cargo-release) version 0.11.0 (Bruno Tavares)
