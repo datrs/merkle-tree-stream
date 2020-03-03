@@ -10,7 +10,7 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-flat-tree = { version = "4.1.0", git = "https://github.com/bltavares/flat-tree", branch = "usize-to-u64" }
+flat-tree = "5.0.0"
 
 [dev-dependencies]
 hex = "0.4.2"
