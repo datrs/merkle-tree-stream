@@ -282,3 +282,18 @@ fn hashes_change_when_data_is_changed() {
   }
   quickcheck(prop as fn(Vec<u8>, Vec<Vec<u8>>, usize, Vec<u8>) -> bool);
 }
+
+#[test]
+fn mts_new_with_nodes() {
+  let roots = vec![Arc::new(DefaultNode {
+    parent: 0,
+    data: Some(b"test".to_vec()),
+    hash: vec![],
+    length: 4,
+    index: 0,
+  })];
+
+  let mts = MerkleTreeStream::new(H, roots);
+
+  assert_eq!(mts.blocks(), 1);
+}
