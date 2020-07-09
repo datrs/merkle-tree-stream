@@ -1,3 +1,20 @@
+## 2020-07-09, Version 0.12.1
+### Commits
+- [[`19c8ba8bfb`](https://github.com/datrs/merkle-tree-stream/commit/19c8ba8bfbf7ee6a47b27ee14e396ffee2d63457)] (cargo-release) version 0.12.1 (Bruno Tavares)
+- [[`3c047cbdca`](https://github.com/datrs/merkle-tree-stream/commit/3c047cbdca7ee0ee9bce7260f6138d93f22b1d9f)] Merge pull request #31 from khodzha/stream_init (Bruno Tavares)
+- [[`c3bb96094d`](https://github.com/datrs/merkle-tree-stream/commit/c3bb96094d7aa1066a65f570cddce55e36b9b64f)] proper initialization for MerkleTreeStream (Shamir Khodzha)
+- [[`cedc3421a9`](https://github.com/datrs/merkle-tree-stream/commit/cedc3421a9d0c618373b0c6b954023073479dd0b)] Update changelog (Bruno Tavares)
+
+### Stats
+```diff
+ CHANGELOG.md | 20 ++++++++++++++++++++
+ Cargo.toml   |  2 +-
+ src/lib.rs   | 15 ++++++++++++++-
+ tests/lib.rs | 15 +++++++++++++++
+ 4 files changed, 50 insertions(+), 2 deletions(-)
+```
+
+
 ## 2020-03-03, Version 0.12.0
 ### Commits
 - [[`9779383689`](https://github.com/datrs/merkle-tree-stream/commit/9779383689adaa88b9fafc04d43c7055fcdaf2e5)] (cargo-release) version 0.12.0 (Bruno Tavares)
