@@ -184,10 +184,18 @@ pub struct MerkleTreeStream<T: HashMethods> {
 impl<H: HashMethods> MerkleTreeStream<H> {
   /// Create a new MerkleTreeStream instance.
   pub fn new(handler: H, roots: Vec<Arc<H::Node>>) -> MerkleTreeStream<H> {
+    let blocks = if !roots.is_empty() {
+      // Cant panic because roots.len() > 0
+      let root = roots.last().unwrap();
+      1 + flat::right_span(root.index()) / 2
+    } else {
+      0
+    };
+
     MerkleTreeStream {
       handler,
       roots,
-      blocks: 0,
+      blocks,
     }
   }
 
@@ -247,5 +255,10 @@ impl<H: HashMethods> MerkleTreeStream<H> {
   /// Get the roots vector.
   pub fn roots(&self) -> &Vec<Arc<H::Node>> {
     &self.roots
+  }
+
+  /// Get number of blocks
+  pub fn blocks(&self) -> u64 {
+    self.blocks
   }
 }
